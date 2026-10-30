@@ -1,6 +1,6 @@
-# Slide Presentasi Interaktif Praktikum ASD 2026
+# Slide Presentasi Interaktif Praktikum Struktur Data 2026
 
-Koleksi web slide presentasi praktikum mata kuliah **Algoritma dan Struktur Data (ASD)** edisi 2026 di Laboratorium Ilmu Komputer Universitas Pertamina.
+Koleksi web slide presentasi praktikum mata kuliah **Praktikum Struktur Data** edisi 2026 di Laboratorium Ilmu Komputer Universitas Pertamina.
 
 Presentasi dibangun menggunakan teknologi *single-page HTML mandiri (zero build-step)* dengan Tailwind CSS, GSAP 3.x animation engine, tipografi proyektor, serta dukungan tema gelap & terang.
 

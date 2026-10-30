@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Praktikum Algoritma & Struktur Data 2026 | Slide Portal</title>
+  <title>Praktikum Struktur Data 2026 | Slide Portal</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -13,9 +13,9 @@
         extend: {
           colors: {
             brand: {
-              500: '#14b8a6',
-              600: '#0d9488',
-              700: '#0f766e',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
             }
           },
           fontFamily: {
@@ -28,178 +28,353 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
     code, .font-mono { font-family: 'Fira Code', monospace; }
+    .card-hover {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-hover:hover {
+      transform: translateY(-4px);
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col justify-between transition-colors duration-300">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col justify-between transition-colors duration-300">
+
+  <!-- TOAST FEEDBACK NOTIFICATION -->
+  <div id="toastNotification" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-2 transition-all duration-300 px-4 py-2 rounded-full bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 text-xs font-bold font-mono shadow-xl border border-slate-700/50 flex items-center gap-2">
+    <span id="toastIcon">⚡</span>
+    <span id="toastMessage">Pemberitahuan</span>
+  </div>
 
   <!-- TOP HEADER -->
-  <header class="border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur sticky top-0 z-30 px-6 py-4">
-    <div class="max-w-6xl mx-auto flex items-center justify-between">
-      <div class="flex items-center space-x-3.5">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-black text-lg shadow-md shadow-teal-500/20">
-          ASD
+  <header class="border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur sticky top-0 z-30 px-4 sm:px-8 py-3.5 select-none">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 via-teal-600 to-indigo-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-sky-500/25">
+          PSD
         </div>
         <div>
-          <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            <span>Praktikum ASD</span>
-            <span class="text-xs px-2.5 py-0.5 rounded-full bg-teal-100 dark:bg-teal-950 border border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 font-bold">Edisi 2026</span>
-          </h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Portal Web Slide Presentasi Interaktif • Universitas Pertamina</p>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Praktikum Struktur Data
+            </h1>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950 border border-sky-300 dark:border-sky-800 text-sky-800 dark:text-sky-300 font-bold">
+              2026
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Laboratorium Ilmu Komputer • Universitas Pertamina</p>
         </div>
       </div>
 
       <!-- Action buttons -->
       <div class="flex items-center space-x-2">
-        <button onclick="toggleTheme()" title="Ganti Tema" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition">
-          <svg id="themeIconSun" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
-          <svg id="themeIconMoon" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <!-- Fullscreen Button -->
+        <button onclick="toggleFullscreen()" id="btnFullscreen" title="Layar Penuh (F)" class="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
+          <svg id="fsIconExpand" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+          <svg id="fsIconCompress" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14h6m0 0v6m0-6L3 21m17-7h-6m0 0v6m0-6l7 7M10 4v6m0 0H4m6 0L3 3m10 7h6m-6 0V4m0 6l7-7"></path></svg>
+          <span class="hidden md:inline">Fullscreen</span>
+          <kbd class="hidden md:inline px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded font-mono text-[10px]">F</kbd>
         </button>
-        <a href="https://github.com/irfanwk/Praktikum-ASD-Slides-2026" target="_blank" rel="noopener noreferrer" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition" title="Lihat di GitHub">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+
+        <!-- Theme Toggle Button -->
+        <button onclick="toggleTheme()" id="btnTheme" title="Ganti Tema (T)" class="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
+          <svg id="themeIconSun" class="w-4 h-4 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+          <svg id="themeIconMoon" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+          <span class="hidden md:inline">Tema</span>
+          <kbd class="hidden md:inline px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded font-mono text-[10px]">T</kbd>
+        </button>
+
+        <!-- GitHub Repo Link -->
+        <a href="https://github.com/irfanwk/Praktikum-ASD-Slides-2026" target="_blank" rel="noopener noreferrer" class="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition" title="Lihat di GitHub">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <span class="hidden lg:inline">GitHub</span>
         </a>
       </div>
+
     </div>
   </header>
 
   <!-- HERO SECTION -->
-  <main class="max-w-6xl mx-auto px-6 py-10 flex-1 w-full">
-    <div class="text-center max-w-3xl mx-auto mb-12">
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-100 dark:bg-teal-950/80 border border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 text-xs font-bold mb-4 shadow-sm">
-        <span>Laboratorium Komputer • Universitas Pertamina</span>
+  <main class="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 w-full flex flex-col justify-between">
+    
+    <!-- Top Introduction -->
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 dark:bg-sky-950/80 border border-sky-300 dark:border-sky-800 text-sky-800 dark:text-sky-300 text-xs font-bold mb-4 shadow-sm">
+        <span>Laboratorium Ilmu Komputer • Kurikulum 2026</span>
       </div>
       <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
         Slide Presentasi Interaktif <br class="hidden sm:inline">
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-indigo-500 to-purple-500">Algoritma & Struktur Data</span>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-teal-400 to-indigo-400">Praktikum Struktur Data</span>
       </h2>
       <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-        Materi pengajaran modul praktikum berbasis web single-page mandiri, dilengkapi analogi fisik, visualisasi animasi deterministik, analisis ongkos komputasi, dan pendekatan C++ prosedural murni.
+        Portal modul materi pengajaran lab berbasis web mandiri (*zero-dependency*), dilengkapi model fisik nyata, simulator animasi deterministik, serta standar kompilasi C++ prosedural.
       </p>
+
+      <!-- Highlights Chips -->
+      <div class="flex flex-wrap items-center justify-center gap-2 mt-5 text-[11px] font-mono text-slate-600 dark:text-slate-400">
+        <span class="px-2.5 py-1 rounded-lg bg-slate-200/80 dark:bg-slate-900 border border-slate-300/60 dark:border-slate-800">C++17 Prosedural</span>
+        <span class="px-2.5 py-1 rounded-lg bg-slate-200/80 dark:bg-slate-900 border border-slate-300/60 dark:border-slate-800">GSAP 60 FPS</span>
+        <span class="px-2.5 py-1 rounded-lg bg-slate-200/80 dark:bg-slate-900 border border-slate-300/60 dark:border-slate-800">Allocation Balance</span>
+        <span class="px-2.5 py-1 rounded-lg bg-slate-200/80 dark:bg-slate-900 border border-slate-300/60 dark:border-slate-800">Responsive Proyektor</span>
+      </div>
     </div>
 
-    <!-- MODULE CARDS GRID -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- MODULE CARDS GRID (BENTO 4 COLUMNS) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
 
       <!-- MODUL 3 -->
-      <a href="slide_modul3_2026_asd.html" class="group p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+      <a href="slide_modul3_2026_asd.html" class="card-hover group p-6 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800/90 hover:border-emerald-500 dark:hover:border-emerald-500 shadow-sm hover:shadow-xl transition flex flex-col justify-between">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-mono font-bold text-xs">
+          <div class="flex items-center justify-between mb-3.5">
+            <span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-mono font-bold text-xs border border-emerald-300 dark:border-emerald-800">
               MODUL 03
             </span>
             <span class="text-xs text-slate-400 font-mono">16 Slide • Array Statis</span>
           </div>
-          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-emerald-500 transition mb-2">
+          <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-emerald-500 transition mb-2">
             ADT List Representasi Array Statis
           </h3>
-          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-            Konsep wadah terurut Dale (2016) menggunakan array statis, perdebatan penyimpanan NEF, analisis pergeseran elemen InsertAt / DeleteAt O(N), dan larangan alokasi dinamis.
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+            Representasi wadah Dale (2016) menggunakan array statis, perdebatan letak NEF (global vs parameter vs struct), analisis pergeseran memori InsertAt / DeleteAt O(N), dan larangan alokasi dinamis.
           </p>
         </div>
-        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
-          <span>Buka Presentasi</span>
-          <span class="group-hover:translate-x-1 transition-transform">➔</span>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+          <span class="flex items-center gap-1.5">
+            <span>Buka Presentasi</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 font-mono text-[10px] border border-emerald-200 dark:border-emerald-800">3</kbd>
+          </span>
+          <span class="group-hover:translate-x-1.5 transition-transform text-base">➔</span>
         </div>
       </a>
 
       <!-- MODUL 4 -->
-      <a href="slide_modul4_2026_asd.html" class="group p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+      <a href="slide_modul4_2026_asd.html" class="card-hover group p-6 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800/90 hover:border-sky-500 dark:hover:border-sky-500 shadow-sm hover:shadow-xl transition flex flex-col justify-between">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-mono font-bold text-xs">
+          <div class="flex items-center justify-between mb-3.5">
+            <span class="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300 font-mono font-bold text-xs border border-sky-300 dark:border-sky-800">
               MODUL 04
             </span>
-            <span class="text-xs text-slate-400 font-mono">16 Slide • Linked List</span>
+            <span class="text-xs text-slate-400 font-mono">16 Slide • Heap & Node</span>
           </div>
-          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-blue-500 transition mb-2">
+          <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-sky-500 transition mb-2">
             Singly Linked List & Manajemen Heap
           </h3>
-          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-            Peralihan dari array ke node dinamis di heap, pointer head, penelusuran traversal, 8 operasi standar Dale, serta pembuktian bebas memory leak via Allocation Balance.
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+            Peralihan dari array ke node dinamis di memori heap, pergerakan pointer head, penelusuran traversal aman, 8 operasi standar Dale, serta pembuktian bebas bocor memori via Allocation Balance.
           </p>
         </div>
-        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
-          <span>Buka Presentasi</span>
-          <span class="group-hover:translate-x-1 transition-transform">➔</span>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-sky-600 dark:text-sky-400">
+          <span class="flex items-center gap-1.5">
+            <span>Buka Presentasi</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-sky-50 dark:bg-sky-950 font-mono text-[10px] border border-sky-200 dark:border-sky-800">4</kbd>
+          </span>
+          <span class="group-hover:translate-x-1.5 transition-transform text-base">➔</span>
         </div>
       </a>
 
       <!-- MODUL 5 -->
-      <a href="slide_w5_varian_linked_list.html" class="group p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-purple-500 dark:hover:border-purple-500 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+      <a href="slide_w5_varian_linked_list.html" class="card-hover group p-6 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800/90 hover:border-purple-500 dark:hover:border-purple-500 shadow-sm hover:shadow-xl transition flex flex-col justify-between">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-mono font-bold text-xs">
+          <div class="flex items-center justify-between mb-3.5">
+            <span class="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 font-mono font-bold text-xs border border-purple-300 dark:border-purple-800">
               MODUL 05
             </span>
             <span class="text-xs text-slate-400 font-mono">16 Slide • GSAP Engine</span>
           </div>
-          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-purple-500 transition mb-2">
+          <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-purple-500 transition mb-2">
             Varian Linked List: Doubly & Circular
           </h3>
-          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-            Pointer dua arah (prev & next), invarian <code class="font-mono text-purple-400">p->next->prev == p</code>, fungsi pemeriksa <code class="font-mono">utuh()</code>, cincin circular berpenunjuk tail, dan simulator GSAP reversibel.
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+            Pointer dua arah (prev & next), invarian matematis <code class="font-mono text-purple-400">p->next->prev == p</code>, fungsi pemeriksa <code class="font-mono">utuh()</code>, cincin melingkar berpenunjuk tail, dan simulator GSAP reversibel.
           </p>
         </div>
-        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400">
-          <span>Buka Presentasi</span>
-          <span class="group-hover:translate-x-1 transition-transform">➔</span>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400">
+          <span class="flex items-center gap-1.5">
+            <span>Buka Presentasi</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950 font-mono text-[10px] border border-purple-200 dark:border-purple-800">5</kbd>
+          </span>
+          <span class="group-hover:translate-x-1.5 transition-transform text-base">➔</span>
         </div>
       </a>
 
       <!-- MODUL 6 -->
-      <a href="slide_w6_stack_queue.html" class="group p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-teal-500 dark:hover:border-teal-500 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+      <a href="slide_w6_stack_queue.html" class="card-hover group p-6 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800/90 hover:border-teal-500 dark:hover:border-teal-500 shadow-sm hover:shadow-xl transition flex flex-col justify-between">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 font-mono font-bold text-xs">
+          <div class="flex items-center justify-between mb-3.5">
+            <span class="px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 font-mono font-bold text-xs border border-teal-300 dark:border-teal-800">
               MODUL 06
             </span>
             <span class="text-xs text-slate-400 font-mono">12 Slide • LIFO & FIFO</span>
           </div>
-          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-teal-500 transition mb-2">
+          <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-teal-500 transition mb-2">
             ADT Stack & Queue
           </h3>
-          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-            Disiplin akses LIFO dan FIFO, pemecahan kotak mati lewat array melingkar (<code class="font-mono text-teal-400">% KAP</code>), pengamanan kondisi batas, dan peran pointer tail pada queue linked list.
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+            Disiplin akses LIFO dan FIFO, pemecahan kotak mati lewat array melingkar modulo (<code class="font-mono text-teal-400">% KAP</code>), pengamanan kondisi batas, dan peran pointer tail pada queue linked list.
           </p>
         </div>
-        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-teal-600 dark:text-teal-400">
-          <span>Buka Presentasi</span>
-          <span class="group-hover:translate-x-1 transition-transform">➔</span>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-teal-600 dark:text-teal-400">
+          <span class="flex items-center gap-1.5">
+            <span>Buka Presentasi</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-teal-50 dark:bg-teal-950 font-mono text-[10px] border border-teal-200 dark:border-teal-800">6</kbd>
+          </span>
+          <span class="group-hover:translate-x-1.5 transition-transform text-base">➔</span>
         </div>
       </a>
 
     </div>
 
-    <!-- NAVIGATION GUIDE CARD -->
-    <div class="mt-10 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-xs text-slate-600 dark:text-slate-400">
+    <!-- SHORTCUT & NAVIGATION GUIDE FOOTER CARD -->
+    <div class="mt-8 p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-xs text-slate-600 dark:text-slate-400">
       <div class="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-        <span>⌨️</span> Pintasan Keyboard Saat Membuka Slide Presentasi:
+        <span>⌨️</span> Pintasan Keyboard Global (Berfungsi di Beranda & Seluruh Slide):
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 font-mono">
-        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">←</kbd> Slide Lalu</div>
-        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">→</kbd> / <kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">Space</kbd> Lanjut</div>
-        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">M</kbd> Daftar Menu</div>
-        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">T</kbd> Toggle Tema</div>
-        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">F</kbd> Layar Penuh</div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 font-mono">
+        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
+          <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-bold">F</kbd> Layar Penuh
+        </div>
+        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
+          <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-bold">T</kbd> Toggle Tema
+        </div>
+        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
+          <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-bold">3</kbd> Modul 3
+        </div>
+        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
+          <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-bold">4</kbd> Modul 4
+        </div>
+        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
+          <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-bold">5</kbd> Modul 5
+        </div>
+        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+          <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-bold">6</kbd> Modul 6
+        </div>
       </div>
     </div>
+
   </main>
 
   <!-- FOOTER -->
-  <footer class="border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500">
-    <p>Praktikum Algoritma dan Struktur Data (ASD) • Laboratorium Ilmu Komputer Universitas Pertamina</p>
+  <footer class="border-t border-slate-200 dark:border-slate-800/80 py-5 px-6 text-center text-xs text-slate-500">
+    <p>Praktikum Struktur Data • Laboratorium Ilmu Komputer Universitas Pertamina</p>
   </footer>
 
+  <!-- SCRIPT LOGIC -->
   <script>
+    // Toast helper
+    let toastTimeout = null;
+    function showToast(icon, message) {
+      const toast = document.getElementById('toastNotification');
+      const iconEl = document.getElementById('toastIcon');
+      const msgEl = document.getElementById('toastMessage');
+      if (!toast || !iconEl || !msgEl) return;
+
+      iconEl.innerText = icon;
+      msgEl.innerText = message;
+
+      toast.classList.remove('opacity-0', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-2');
+      }, 2000);
+    }
+
+    // Toggle Theme
     function toggleTheme() {
       const html = document.documentElement;
       html.classList.toggle('dark');
-      localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+      const isDark = html.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      showToast(isDark ? '🌙' : '☀️', 'Tema ' + (isDark ? 'Gelap' : 'Terang') + ' Aktif');
     }
-    // Init theme
+
+    // Toggle Fullscreen with robust cross-browser API
+    function toggleFullscreen() {
+      const doc = document;
+      const docEl = doc.documentElement;
+
+      const isFs = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
+
+      if (!isFs) {
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        } else if (docEl.mozRequestFullScreen) {
+          docEl.mozRequestFullScreen();
+        } else if (docEl.msRequestFullscreen) {
+          docEl.msRequestFullscreen();
+        }
+        showToast('⛶', 'Layar Penuh Diaktifkan (Tekan F atau Esc)');
+      } else {
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen().catch(() => {});
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen();
+        } else if (doc.mozCancelFullScreen) {
+          doc.mozCancelFullScreen();
+        } else if (doc.msExitFullscreen) {
+          doc.msExitFullscreen();
+        }
+        showToast('🗗', 'Layar Penuh Dimatikan');
+      }
+    }
+
+    // Update Fullscreen Button Icons on change
+    function updateFullscreenIcons() {
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+      const iconExpand = document.getElementById('fsIconExpand');
+      const iconCompress = document.getElementById('fsIconCompress');
+      if (iconExpand && iconCompress) {
+        if (isFs) {
+          iconExpand.classList.add('hidden');
+          iconCompress.classList.remove('hidden');
+        } else {
+          iconExpand.classList.remove('hidden');
+          iconCompress.classList.add('hidden');
+        }
+      }
+    }
+
+    document.addEventListener('fullscreenchange', updateFullscreenIcons);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenIcons);
+    document.addEventListener('mozfullscreenchange', updateFullscreenIcons);
+    document.addEventListener('MSFullscreenChange', updateFullscreenIcons);
+
+    // Keyboard Shortcuts for portal
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      const key = e.key;
+
+      if (key === 'f' || key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (key === 't' || key === 'T') {
+        e.preventDefault();
+        toggleTheme();
+      } else if (key === '3' || key === '1') {
+        showToast('🚀', 'Membuka Modul 3: ADT List Array Statis...');
+        setTimeout(() => { window.location.href = 'slide_modul3_2026_asd.html'; }, 300);
+      } else if (key === '4' || key === '2') {
+        showToast('🚀', 'Membuka Modul 4: Singly Linked List...');
+        setTimeout(() => { window.location.href = 'slide_modul4_2026_asd.html'; }, 300);
+      } else if (key === '5') {
+        showToast('🚀', 'Membuka Modul 5: Varian Linked List...');
+        setTimeout(() => { window.location.href = 'slide_w5_varian_linked_list.html'; }, 300);
+      } else if (key === '6') {
+        showToast('🚀', 'Membuka Modul 6: ADT Stack & Queue...');
+        setTimeout(() => { window.location.href = 'slide_w6_stack_queue.html'; }, 300);
+      }
+    });
+
+    // Init Theme on load
     if (localStorage.getItem('theme') === 'light') {
       document.documentElement.classList.remove('dark');
     }
