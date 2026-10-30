@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modul 6 (2026): ADT Stack & Queue | Praktikum ASD</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: "#f0fdf4",
+              100: "#dcfce7",
+              200: "#bbf7d0",
+              300: "#86efac",
+              400: "#4ade80",
+              500: "#22c55e",
+              600: "#16a34a",
+              700: "#15803d",
+              800: "#166534",
+              900: "#14532d",
+            },
+            stack: {
+              500: "#3b82f6",
+              600: "#2563eb",
+              700: "#1d4ed8"
+            },
+            queue: {
+              500: "#06b6d4",
+              600: "#0891b2",
+              700: "#0e7490"
+            },
+            code: {
+              bg: "#0a0d18",
+              border: "#1e293b"
+            }
+          },
+          fontFamily: {
+            sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+            mono: ["Fira Code", "JetBrains Mono", "Consolas", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      user-select: none;
+    }
+    code, pre, .font-mono {
+      font-family: "Fira Code", monospace;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .dark ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.7);
+    }
+    .slide-enter {
+      animation: fadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.995); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 h-screen w-screen overflow-hidden flex flex-col justify-between transition-colors duration-300">
+
+  <!-- TOP HEADER / CONTROL BAR -->
+  <header class="h-16 border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-6 flex items-center justify-between z-30 shrink-0 select-none">
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-teal-600 to-emerald-500 text-white flex items-center justify-center font-black text-base shadow-lg shadow-teal-500/25">
+        M6
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <span>Modul 6: ADT Stack & Queue</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-teal-100 dark:bg-teal-950 border border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 font-bold">Edisi 2026</span>
+        </h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">LIFO vs FIFO • Array Statis & Linked List • C++ Prosedural</p>
+      </div>
+    </div>
+
+    <!-- Center Slide Counter / Progress -->
+    <div class="flex items-center space-x-4">
+      <div class="text-xs sm:text-sm font-bold px-3.5 py-1.5 rounded-full bg-slate-200/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300/60 dark:border-slate-700">
+        Slide <span id="currentSlideNum" class="text-teal-600 dark:text-teal-400 font-extrabold">1</span> / <span id="totalSlideNum">12</span>
+      </div>
+      <div class="w-32 sm:w-56 h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 via-teal-500 to-emerald-400 transition-all duration-300 ease-out" style="width: 8.33%;"></div>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center space-x-2">
+      <!-- Slide Menu / Table of Contents -->
+      <button onclick="toggleSlideMenu()" title="Daftar Slide (M)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button onclick="toggleTheme()" title="Ganti Tema (T)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg id="themeIconSun" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+        <svg id="themeIconMoon" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button onclick="toggleFullscreen()" title="Layar Penuh (F)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE VIEWPORT CONTAINER -->
+  <main id="slideContainer" class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 lg:p-10 flex items-center justify-center relative">
+
+    <!-- SLIDE 1: COVER -->
+    <div class="slide slide-enter w-full max-w-6xl mx-auto flex flex-col items-center justify-center text-center py-4">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-100 dark:bg-teal-950/90 border border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 text-sm font-bold mb-6 shadow-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-ping"></span>
+        Praktikum Algoritma & Struktur Data • Modul 6 Edisi 2026
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-tight mb-5">
+        Modul 6: <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-teal-400 to-emerald-400">ADT Stack & Queue</span>
+      </h1>
+
+      <p class="text-lg sm:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mb-8 leading-relaxed font-normal">
+        Memahami disiplin akses <b>LIFO</b> dan <b>FIFO</b> pada representasi <b>Array Statis</b> dan <b>Linked List</b>, memecahkan jebakan kotak mati lewat <b>Array Melingkar (Modulo)</b>, dan mengamankan kondisi batas dengan pendekatan <b>C++ Prosedural</b>.
+      </p>
+
+      <!-- 4 Highlight Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full max-w-5xl mb-8 text-left">
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-blue-500/20 shadow-md hover:border-blue-500/50 transition">
+          <div class="text-blue-500 font-extrabold text-2xl mb-1">01. LIFO (Stack)</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Tumpukan satu ujung: yang masuk terakhir keluar pertama. Operasi di ujung atas selalu <code class="font-mono text-blue-400">O(1)</code>.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-teal-500/20 shadow-md hover:border-teal-500/50 transition">
+          <div class="text-teal-500 font-extrabold text-2xl mb-1">02. FIFO (Queue)</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Antrean dua ujung: masuk di belakang, keluar di depan. Mengalir adil berurutan <code class="font-mono text-teal-400">O(1)</code>.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-emerald-500/20 shadow-md hover:border-emerald-500/50 transition">
+          <div class="text-emerald-500 font-extrabold text-2xl mb-1">03. Array Melingkar</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Mencegah kotak mati akibat pergeseran pointer lewat operator modulo <code class="font-mono text-emerald-400">% KAP</code>.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-500/20 shadow-md hover:border-amber-500/50 transition">
+          <div class="text-amber-500 font-extrabold text-2xl mb-1">04. Disiplin Batas</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Cegah akses liar <code class="font-mono text-rose-400">a[-1]</code> dan <code class="font-mono text-rose-400">a[KAP]</code> dengan menguji batas di baris pertama.</div>
+        </div>
+      </div>
+
+      <!-- Quick Action -->
+      <div class="flex flex-col sm:flex-row items-center gap-4">
+        <button onclick="nextSlide()" class="px-8 py-4 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-base shadow-xl shadow-teal-500/30 transition transform hover:-translate-y-0.5 flex items-center gap-3">
+          <span>Mulai Presentasi</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+        </button>
+        <span class="text-xs text-slate-500 dark:text-slate-400">Tekan <kbd class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 font-mono text-xs">Space</kbd> atau <kbd class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 font-mono text-xs">→</kbd> di keyboard</span>
+      </div>
+    </div>
+    <!-- SLIDE 2: THE WHY & ATURAN PROSEDURAL LAB -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950/70 border border-teal-300 dark:border-teal-800">
+          The Why & Aturan Lab • 6.2 Dasar Teori
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          Mengapa Membatasi Akses? & Standar C++ Prosedural
+        </h2>
+        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-1">
+          Pada Modul 3–5 kita membuat list bebas. Membatasi akses pintu masuk dan keluar bukan kelemahan, melainkan <b>kontrak integritas</b>.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-4">
+        <!-- The Why Card -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-3">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🛡️</span> Mengapa Akses Perlu Dibatasi?
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Jika sembarang fungsi boleh menyisipkan atau menghapus data di tengah-tengah urutan, alur sistem menjadi tidak terprediksi:
+          </p>
+          <ul class="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 list-disc list-inside">
+            <li><b>Undo/Redo & Call Stack memori:</b> Hanya aksi paling akhir yang boleh dibatalkan. Mengambil dari tengah akan merusak rantai eksekusi.</li>
+            <li><b>Print Queue & Packet Router:</b> Siapa yang datang duluan wajib dilayani duluan demi keadilan (*fairness*).</li>
+          </ul>
+        </div>
+
+        <!-- Prosedural vs OOP Card (From PDF Table 6.2) -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+            <span>⚙️</span> Prosedural (Yang Dipakai) vs OOP (Bukan Ini)
+          </h3>
+          <div class="overflow-x-auto text-xs font-mono">
+            <table class="w-full text-left">
+              <thead class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                <tr>
+                  <th class="p-1.5">Aspek</th>
+                  <th class="p-1.5 text-teal-600 dark:text-teal-400">Prosedural (Lab)</th>
+                  <th class="p-1.5 text-slate-400">OOP (Dilarang)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-[11px]">
+                <tr>
+                  <td class="p-1.5 font-sans font-semibold">Wadah data</td>
+                  <td class="p-1.5 text-teal-600 dark:text-teal-300">struct publik</td>
+                  <td class="p-1.5 text-slate-400">class private</td>
+                </tr>
+                <tr>
+                  <td class="p-1.5 font-sans font-semibold">Operasi</td>
+                  <td class="p-1.5 text-teal-600 dark:text-teal-300">fungsi bebas di luar</td>
+                  <td class="p-1.5 text-slate-400">method di dalam class</td>
+                </tr>
+                <tr>
+                  <td class="p-1.5 font-sans font-semibold">Pemanggilan</td>
+                  <td class="p-1.5 text-teal-600 dark:text-teal-300">Push(S, x)</td>
+                  <td class="p-1.5 text-slate-400">S.push(x)</td>
+                </tr>
+                <tr>
+                  <td class="p-1.5 font-sans font-semibold">Mutasi state</td>
+                  <td class="p-1.5 text-teal-600 dark:text-teal-300">parameter referensi &</td>
+                  <td class="p-1.5 text-slate-400">this tersirat</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Golden Rules from PDF -->
+      <div class="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 text-xs sm:text-sm text-teal-900 dark:text-teal-200">
+        <b>Tiga Aturan yang Mengikat di Praktikum Ini:</b>
+        <ol class="list-decimal list-inside mt-1 space-y-0.5 text-xs">
+          <li>Semua data disimpan dalam <code class="font-mono">struct</code>. Tidak ada variabel global selain penghitung allocation balance.</li>
+          <li>Setiap fungsi yang mengubah struktur menerimanya sebagai parameter referensi (<code class="font-mono">&</code>). Yang hanya membaca memakai <code class="font-mono">const &</code>.</li>
+          <li>Setiap operasi yang punya prasyarat mengembalikan <code class="font-mono">bool</code>: <code class="font-mono">true</code> bila berhasil, <code class="font-mono">false</code> bila gagal. Jangan memakai <code class="font-mono">exit()</code>!</li>
+        </ol>
+      </div>
+    </div>
+    <!-- SLIDE 3: MENTAL MODEL & ANALOGI -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Mental Model • 6.2 Dasar Teori
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Analogi Fisik: Tumpukan Piring vs Antrean Kasir
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Kunci membedakan Stack dan Queue terletak pada <b>berapa banyak ujung</b> yang aktif disentuh.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <!-- Stack Analogy -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-blue-500/30 shadow-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-mono font-bold text-xs uppercase">Stack • LIFO</span>
+              <span class="text-2xl">🍽️</span>
+            </div>
+            <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">Tumpukan Piring Kantin</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              Petugas kantin menaruh piring bersih yang baru dicuci <b>di paling atas</b> (<code class="font-mono text-blue-400">Push</code>). Mahasiswa yang ingin makan juga mengambil piring <b>dari paling atas</b> (<code class="font-mono text-blue-400">Pop</code>). Piring yang pertama kali ditaruh di dasar akan menjadi yang paling terakhir diambil.
+            </p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-xs text-blue-900 dark:text-blue-200">
+            <b>1 Ujung Aktif:</b> Masuk di <b>ATAS</b>, keluar di <b>ATAS</b>. Indeks kerja: <code class="font-mono">nef - 1</code>.
+          </div>
+        </div>
+
+        <!-- Queue Analogy -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-teal-500/30 shadow-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 font-mono font-bold text-xs uppercase">Queue • FIFO</span>
+              <span class="text-2xl">🛒</span>
+            </div>
+            <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">Antrean Kasir Supermarket</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              Pelanggan baru datang dan berdiri di posisi <b>paling belakang</b> (<code class="font-mono text-teal-400">Enqueue</code>). Kasir melayani dan memproses pelanggan yang berdiri di <b>paling depan</b> (<code class="font-mono text-teal-400">Dequeue</code>). Tidak boleh memotong antrean dari tengah maupun dari depan.
+            </p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800 text-xs text-teal-900 dark:text-teal-200">
+            <b>2 Ujung Aktif:</b> Masuk di <b>BELAKANG (Rear)</b>, keluar di <b>DEPAN (Front)</b>.
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5 p-4 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium text-center">
+        ⚡ <b>Perbedaan Tunggal yang Berdampak Besar:</b> Pada stack, penambahan dan pengurangan terjadi di titik yang sama. Pada queue, penambahan dan pengurangan terjadi di dua ujung terpisah. Hal ini menuntut strategi implementasi yang sama sekali berbeda pada array!
+      </div>
+    </div>
+    <!-- SLIDE 4: ADT STACK SPESIFIKASI & REPRESENTASI ARRAY -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-3">
+        <span class="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+          Kontrak & Implementasi • 6.2.1.1 & 6.2.1.2
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          ADT Stack: Spesifikasi & Representasi Array
+        </h2>
+        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+          Cukup satu array dan satu <code class="font-mono text-blue-500 font-bold">nef</code>. Elemen teratas selalu di indeks <code class="font-mono text-blue-500">nef - 1</code>.
+        </p>
+      </div>
+
+      <!-- Specification Table -->
+      <div class="overflow-x-auto mb-4 rounded-xl border border-slate-300 dark:border-slate-800 shadow-sm">
+        <table class="w-full text-left text-xs font-sans bg-white dark:bg-slate-900">
+          <thead class="bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-b border-slate-300 dark:border-slate-700">
+            <tr>
+              <th class="py-2 px-3 font-bold">Operasi C++</th>
+              <th class="py-2 px-3 font-bold">Maksud Operasi</th>
+              <th class="py-2 px-3 font-bold text-amber-600 dark:text-amber-400">Prasyarat</th>
+              <th class="py-2 px-3 font-bold text-teal-600 dark:text-teal-400">Hasil / State Akhir</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-600 dark:text-slate-300">
+            <tr>
+              <td class="py-2 px-3 font-mono font-bold text-blue-500">Push(S, x)</td>
+              <td class="py-2 px-3">Menambah nilai x di atas</td>
+              <td class="py-2 px-3 text-amber-600 dark:text-amber-300">Stack tidak penuh*</td>
+              <td class="py-2 px-3">x jadi teratas baru, return true</td>
+            </tr>
+            <tr>
+              <td class="py-2 px-3 font-mono font-bold text-rose-500">Pop(S, x)</td>
+              <td class="py-2 px-3">Mengambil & membuang teratas</td>
+              <td class="py-2 px-3 text-amber-600 dark:text-amber-300">Stack tidak kosong</td>
+              <td class="py-2 px-3">Nilai keluar lewat referensi x, nef berkurang 1</td>
+            </tr>
+            <tr>
+              <td class="py-2 px-3 font-mono font-bold text-indigo-500">Top(S, x)</td>
+              <td class="py-2 px-3">Melihat teratas tanpa membuang</td>
+              <td class="py-2 px-3 text-amber-600 dark:text-amber-300">Stack tidak kosong</td>
+              <td class="py-2 px-3">x terisi nilai teratas, stack TIDAK berubah</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Code & Trace Columns -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start text-xs">
+        <div class="lg:col-span-7 bg-slate-900 rounded-xl p-3.5 border border-slate-800 font-mono text-slate-200 leading-relaxed">
+          <div class="text-slate-400 pb-1.5 mb-1.5 border-b border-slate-800 flex justify-between">
+            <span>stack_a.cpp</span>
+            <span class="text-blue-400 font-bold">O(1) Semua Operasi</span>
+          </div>
+<pre><code><span class="text-purple-400">const int</span> <span class="text-emerald-400">KAP</span> = 5; <span class="text-slate-500">// kapasitas sengaja 5 agar mudah diuji</span>
+<span class="text-purple-400">struct</span> <span class="text-teal-400">stack_a</span> { <span class="text-emerald-400">int</span> a[<span class="text-emerald-400">KAP</span>]; <span class="text-emerald-400">int</span> nef; };
+
+<span class="text-purple-400">bool</span> SPush(<span class="text-teal-400">stack_a</span> &S, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (S.nef == <span class="text-emerald-400">KAP</span>) <span class="text-purple-400">return false</span>; <span class="text-slate-500">// PRASYARAT</span>
+    S.a[S.nef] = x; S.nef++;
+    <span class="text-purple-400">return true</span>;
+}
+
+<span class="text-purple-400">bool</span> SPop(<span class="text-teal-400">stack_a</span> &S, <span class="text-emerald-400">int</span> &x) {
+    <span class="text-purple-400">if</span> (S.nef == 0) <span class="text-purple-400">return false</span>;   <span class="text-slate-500">// PRASYARAT</span>
+    S.nef--; x = S.a[S.nef];         <span class="text-slate-500">// nef turun DULU!</span>
+    <span class="text-purple-400">return true</span>;
+}</code></pre>
+        </div>
+
+        <div class="lg:col-span-5 space-y-2">
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <h4 class="font-bold text-slate-900 dark:text-white mb-1">🔍 Trace Masuk 7, 10, 4 lalu Pop:</h4>
+            <ol class="list-decimal list-inside space-y-1 text-slate-600 dark:text-slate-300 font-sans">
+              <li>Mula-mula <code class="font-mono">nef = 0</code>.</li>
+              <li>Push 7 &rarr; <code class="font-mono">a[0]=7, nef=1</code>.</li>
+              <li>Push 10 &rarr; <code class="font-mono">a[1]=10, nef=2</code>.</li>
+              <li>Push 4 &rarr; <code class="font-mono">a[2]=4, nef=3</code> (Top di <code class="font-mono">a[2]</code>).</li>
+              <li>Pop &rarr; <code class="font-mono">nef</code> turun ke 2 dulu, lalu <code class="font-mono">a[2]</code> dibaca ke <code class="font-mono">x=4</code>. Nilai 4 di RAM tidak dihapus secara fisik!</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SLIDE 5: SIMULATOR STACK ARRAY -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-3 flex justify-between items-center">
+        <div>
+          <span class="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+            Simulator Interaktif • 6.2.1.3
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            Uji Coba Stack Array & Bahaya Pelanggaran Batas
+          </h2>
+        </div>
+        <div id="stackStatusBadge" class="px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-xs font-mono font-bold">
+          NEF: 0 / 5 • KOSONG
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <!-- Control Panel -->
+        <div class="lg:col-span-5 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">Operasi Resmi (Dengan Pemeriksaan Prasyarat):</h4>
+            
+            <div class="flex gap-2">
+              <input id="stackInputValue" type="number" value="42" class="w-24 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <button onclick="simStackPush()" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+                SPush(x)
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="simStackPop()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+                SPop(x)
+              </button>
+              <button onclick="simStackTop()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+                STop(x)
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200 dark:border-slate-800">
+              <span class="text-xs text-slate-500 font-semibold mb-1 block">Preset Data Soal:</span>
+              <div class="flex gap-1.5 flex-wrap">
+                <button onclick="simStackPresetPush(7)" class="px-2.5 py-1 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg font-mono">Push 7</button>
+                <button onclick="simStackPresetPush(10)" class="px-2.5 py-1 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg font-mono">Push 10</button>
+                <button onclick="simStackPresetPush(4)" class="px-2.5 py-1 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg font-mono">Push 4</button>
+                <button onclick="simStackFillAll()" class="px-2.5 py-1 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg font-mono">Isi Penuh (5)</button>
+                <button onclick="simStackReset()" class="px-2.5 py-1 text-xs bg-slate-200 dark:bg-slate-700 hover:bg-rose-100 rounded-lg font-mono text-rose-600 dark:text-rose-400">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger Simulation -->
+          <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800">
+            <span class="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase block mb-1.5">💥 Simulasi Mengabaikan Prasyarat:</span>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="simStackForcePopUnderflow()" class="px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-800 dark:text-rose-200 border border-rose-400 rounded-lg text-xs font-bold transition">
+                Paksa Pop saat Kosong
+              </button>
+              <button onclick="simStackForcePushOverflow()" class="px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-800 dark:text-rose-200 border border-rose-400 rounded-lg text-xs font-bold transition">
+                Paksa Push saat Penuh
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Canvas Column -->
+        <div class="lg:col-span-7 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between">
+          <div class="mb-2 flex justify-between items-center text-xs font-mono text-slate-500">
+            <span>Visualisasi Array Statis (Kapasitas = 5)</span>
+            <span id="stackActionLog" class="text-blue-500 font-bold">Siap menjalankan instruksi</span>
+          </div>
+
+          <!-- Stack Visual Rack -->
+          <div class="flex items-center justify-center p-4 min-h-[180px]">
+            <div id="stackVisualContainer" class="flex gap-2.5 items-end">
+              <!-- Dynamically populated by JS -->
+            </div>
+          </div>
+
+          <!-- Explanation box -->
+          <div id="stackExplBox" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 font-mono text-xs text-slate-700 dark:text-slate-300">
+            Tekan salah satu tombol untuk melihat bagaimana nilai <code class="text-blue-400">nef</code> mengendalikan gerbang akses stack.
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SLIDE 6: STACK LINKED LIST & PENGUKURAN -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-3">
+        <span class="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+          Representasi Heap • 6.2.1.4 & 6.2.1.5
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Stack dengan Linked List: Mengapa Selalu di Ujung Depan?
+        </h2>
+        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+          Tanpa batasan kapasitas tetap. Cukup memegang satu pointer <code class="font-mono text-blue-500 font-bold">atas</code> yang berperan sama persis dengan <code class="font-mono">head</code>.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- Code Column -->
+        <div class="lg:col-span-6 bg-slate-900 rounded-2xl p-4 border border-slate-800 shadow-xl font-mono text-xs text-slate-200 leading-relaxed">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>stack_list.cpp</span>
+            <span class="text-blue-400 font-bold">Tanpa Batas Penuh</span>
+          </div>
+<pre><code><span class="text-purple-400">struct</span> <span class="text-teal-400">stack_l</span> {
+    <span class="text-teal-400">node_t</span> *atas; <span class="text-slate-500">// menunjuk node teratas di head</span>
+    <span class="text-emerald-400">int</span> nef;
+};
+
+<span class="text-purple-400">void</span> LPush(<span class="text-teal-400">stack_l</span> &S, <span class="text-emerald-400">int</span> x) {
+    <span class="text-teal-400">node_t</span> *b = <span class="text-purple-400">new</span> <span class="text-teal-400">node_t</span>;
+    b->data = x;
+    b->next = S.atas; <span class="text-slate-500">// sambung dulu ke sisa stack</span>
+    S.atas = b;       <span class="text-slate-500">// baru pindahkan pointer atas</span>
+    S.nef++;
+}
+
+<span class="text-purple-400">bool</span> LPop(<span class="text-teal-400">stack_l</span> &S, <span class="text-emerald-400">int</span> &x) {
+    <span class="text-purple-400">if</span> (S.atas == <span class="text-purple-400">nullptr</span>) <span class="text-purple-400">return false</span>;
+    <span class="text-teal-400">node_t</span> *m = S.atas;
+    x = m->data;
+    S.atas = m->next; <span class="text-slate-500">// pointer atas mundur DULU</span>
+    <span class="text-purple-400">delete</span> m;         <span class="text-slate-500">// baru node lama dibebaskan</span>
+    S.nef--;
+    <span class="text-purple-400">return true</span>;
+}</code></pre>
+        </div>
+
+        <!-- Empirical Measurement Table Column -->
+        <div class="lg:col-span-6 space-y-3">
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h4 class="font-bold text-slate-900 dark:text-white mb-2 text-xs sm:text-sm flex items-center justify-between">
+              <span>📊 Bukti Pengukuran Empiris (Dari PDF Halaman 82)</span>
+              <span class="text-[11px] font-mono text-purple-400 font-normal">Satuan: Node Dilewati</span>
+            </h4>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs font-sans">
+                <thead class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  <tr>
+                    <th class="p-2 font-bold">Panjang List</th>
+                    <th class="p-2 font-bold text-emerald-600 dark:text-emerald-400">Push DEPAN</th>
+                    <th class="p-2 font-bold text-rose-500">Push BELAKANG</th>
+                    <th class="p-2 font-bold text-emerald-600 dark:text-emerald-400">Pop DEPAN</th>
+                    <th class="p-2 font-bold text-rose-500">Pop BELAKANG</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-600 dark:text-slate-300 font-mono">
+                  <tr>
+                    <td class="p-2 font-bold">10 node</td>
+                    <td class="p-2 text-emerald-600 dark:text-emerald-400 font-bold">0 node</td>
+                    <td class="p-2 text-rose-500">8 node</td>
+                    <td class="p-2 text-emerald-600 dark:text-emerald-400 font-bold">0 node</td>
+                    <td class="p-2 text-rose-500">9 node</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2 font-bold">100 node</td>
+                    <td class="p-2 text-emerald-600 dark:text-emerald-400 font-bold">0 node</td>
+                    <td class="p-2 text-rose-500">98 node</td>
+                    <td class="p-2 text-emerald-600 dark:text-emerald-400 font-bold">0 node</td>
+                    <td class="p-2 text-rose-500">99 node</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2 font-bold">1.000 node</td>
+                    <td class="p-2 text-emerald-600 dark:text-emerald-400 font-bold">0 node</td>
+                    <td class="p-2 text-rose-500">998 node</td>
+                    <td class="p-2 text-emerald-600 dark:text-emerald-400 font-bold">0 node</td>
+                    <td class="p-2 text-rose-500">999 node</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs sm:text-sm text-blue-900 dark:text-blue-200 font-medium">
+            💡 <b>Kalimat Kunci Modul:</b> "ADT-nya sama, namun cara kita memasangkannya ke representasi fisik menentukan apakah operasinya murah (<code class="font-mono">O(1)</code>) atau mahal (<code class="font-mono">O(N)</code>). Stack di ujung belakang tetap berjalan benar secara logika, namun kinerjanya <code class="font-mono">O(N)</code> — dan itu cukup untuk menjadikannya keputusan desain yang salah."
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SLIDE 7: ADT QUEUE & JEBAKAN QUEUE NAIF -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-3">
+        <span class="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">
+          Analisis Masalah • 6.2.2.1 & 6.2.2.2
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          ADT Queue & Mengapa Percobaan Pertama (Naif) Gagal
+        </h2>
+        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+          Queue menyentuh dua ujung berbeda: masuk di <code class="font-mono text-purple-400">rear</code>, keluar di <code class="font-mono text-blue-400">front</code>. Akibatnya pada array: <b>kasus kotak mati</b>.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- Trace Log -->
+        <div class="lg:col-span-7 bg-slate-900 rounded-2xl p-4 border border-slate-800 shadow-xl font-mono text-xs text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>$ ./queue_naif (Kapasitas = 5)</span>
+            <span class="text-rose-400 font-bold">Kotak Mati Permanen</span>
+          </div>
+<pre class="leading-relaxed"><code>masuk 10 : [10  .   .   .   . ] front=0 rear=1 nef=1
+masuk 20 : [10 20   .   .   . ] front=0 rear=2 nef=2
+masuk 30 : [10 20  30   .   . ] front=0 rear=3 nef=3
+keluar   : [ . 20  30   .   . ] front=1 rear=3 nef=2
+keluar   : [ .  .  30   .   . ] front=2 rear=3 nef=1
+masuk 40 : [ .  .  30  40   . ] front=2 rear=4 nef=2
+masuk 50 : [ .  .  30  40  50 ] front=2 rear=5 nef=3
+masuk 60 : [ .  .  30  40  50 ] <span class="text-rose-400 font-bold">DITOLAK: dikira PENUH!</span></code></pre>
+          <div class="mt-3 p-2.5 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200 text-[11px]">
+            <b>Paradoks:</b> Kapasitas array adalah 5. Yang sedang terisi hanya 3 (indeks 2, 3, 4). Tapi masukan 60 ditolak karena <code class="font-mono">rear == KAP</code>!
+          </div>
+        </div>
+
+        <!-- Problem Breakdown -->
+        <div class="lg:col-span-5 space-y-3 text-xs sm:text-sm">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h4 class="font-bold text-slate-900 dark:text-white mb-2">Mengapa Hal Ini Terjadi?</h4>
+            <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+              Pointer <code class="font-mono text-blue-400">front</code> dan <code class="font-mono text-purple-400">rear</code> hanya bisa <b>MAJU</b>. Setiap kali elemen dikeluarkan (<code class="font-mono">Dequeue</code>), <code class="font-mono">front</code> maju dan meninggalkan kotak kosong di belakangnya yang <b>tidak pernah bisa dipakai lagi</b>!
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200">
+            ⛔ <b>Jalan Keluar yang Salah: Menggeser!</b><br>
+            Sebagian mahasiswa menggeser seluruh elemen ke kiri tiap kali Dequeue. Itu sah, namun membuat Dequeue menjadi <b>O(N)</b>. Kita ingin solusi yang tetap <b>O(1)</b>!
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SLIDE 8: SOLUSI MELINGKAR (MODULO) & INVARIAN NEF -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-3">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          Solusi Modulo • 6.2.2.4 & 6.2.2.5
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Array Melingkar (Modulo) & Membedakan Penuh vs Kosong
+        </h2>
+        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+          Sambungkan kotak terakhir kembali ke kotak pertama via operator modulo <code class="font-mono text-emerald-500 font-bold">% KAP</code>.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- Code Column -->
+        <div class="lg:col-span-7 bg-slate-900 rounded-2xl p-4 border border-slate-800 shadow-xl font-mono text-xs sm:text-[13px] text-slate-200 leading-relaxed">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>queue_circular.cpp</span>
+            <span class="text-emerald-400 font-bold">rear Dihitung, Bukan Disimpan</span>
+          </div>
+<pre><code><span class="text-purple-400">struct</span> <span class="text-teal-400">queue_a</span> {
+    <span class="text-emerald-400">int</span> a[<span class="text-emerald-400">KAP</span>]; <span class="text-emerald-400">int</span> front; <span class="text-emerald-400">int</span> nef; <span class="text-slate-500">// rear TIDAK disimpan!</span>
+};
+
+<span class="text-purple-400">bool</span> QMasuk(<span class="text-teal-400">queue_a</span> &Q, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (Q.nef == <span class="text-emerald-400">KAP</span>) <span class="text-purple-400">return false</span>; <span class="text-slate-500">// PENUH</span>
+    Q.a[(Q.front + Q.nef) % <span class="text-emerald-400">KAP</span>] = x; <span class="text-slate-500">// RUMUS EMAS</span>
+    Q.nef++; <span class="text-purple-400">return true</span>;
+}
+
+<span class="text-purple-400">bool</span> QKeluar(<span class="text-teal-400">queue_a</span> &Q, <span class="text-emerald-400">int</span> &x) {
+    <span class="text-purple-400">if</span> (Q.nef == 0) <span class="text-purple-400">return false</span>;   <span class="text-slate-500">// KOSONG</span>
+    x = Q.a[Q.front];
+    Q.front = (Q.front + 1) % <span class="text-emerald-400">KAP</span>;     <span class="text-slate-500">// front melingkar</span>
+    Q.nef--; <span class="text-purple-400">return true</span>;
+}</code></pre>
+        </div>
+
+        <!-- Invariant NEF & 3 Approaches -->
+        <div class="lg:col-span-5 space-y-3 text-xs sm:text-sm">
+          <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200">
+            <h4 class="font-bold text-sm mb-1">🎯 Masuk 60 Mendarat di Kotak 0:</h4>
+            <p class="text-xs leading-relaxed font-sans">
+              Saat ini <code class="font-mono">front = 2</code>, <code class="font-mono">nef = 3</code>.<br>
+              Indeks baru: <code class="font-mono font-bold">(2 + 3) % 5 = 0</code>!<br>
+              Nilai 60 mendarat di kotak 0 yang tadi mati. Kapasitas pulih 100%!
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h4 class="font-bold text-slate-900 dark:text-white mb-1">Pembeda Penuh vs Kosong:</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Saat kosong, <code class="font-mono">front == rear</code>. Saat penuh, <code class="font-mono">front == rear</code> juga! Modul ini memilih <b>menyimpan NEF</b>:
+              <br>• Kosong jika <code class="font-mono font-bold">nef == 0</code>
+              <br>• Penuh jika <code class="font-mono font-bold">nef == KAP</code>
+              <br><b>Hasil:</b> Nol kotak terbuang, dan <code class="font-mono">rear</code> didapat gratis!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SLIDE 9: SIMULATOR QUEUE NAIF VS MELINGKAR -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-3 flex justify-between items-center">
+        <div>
+          <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+            Komparasi Interaktif • 6.2.2.4
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            Simulator Queue: Naif (Kotak Mati) vs Melingkar (Modulo)
+          </h2>
+        </div>
+        <!-- Mode Switcher -->
+        <div class="flex rounded-xl bg-slate-200 dark:bg-slate-800 p-1 border border-slate-300 dark:border-slate-700">
+          <button id="simQueueModeNaifBtn" onclick="setSimQueueMode('naif')" class="px-3 py-1 rounded-lg text-xs font-bold transition text-slate-600 dark:text-slate-400">
+            Pendekatan Naif
+          </button>
+          <button id="simQueueModeCircularBtn" onclick="setSimQueueMode('circular')" class="px-3 py-1 rounded-lg text-xs font-bold bg-teal-600 text-white shadow-sm transition">
+            Array Melingkar (Modulo)
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <!-- Control Sidebar -->
+        <div class="lg:col-span-5 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">Operasi Manual:</h4>
+            <div class="flex gap-2">
+              <input id="queueInputValue" type="number" value="60" class="w-24 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <button onclick="simQueueManualEnqueue()" class="flex-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+                QMasuk(x)
+              </button>
+              <button onclick="simQueueManualDequeue()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+                QKeluar()
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200 dark:border-slate-800">
+              <span class="text-xs text-slate-500 font-semibold mb-1 block">Alur Uji Cepat Modul 6:</span>
+              <button onclick="simQueueRunStandardScenario()" class="w-full px-3 py-2 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2">
+                <span>▶ Jalankan Rangkaian Modul (10, 20, 30 -> Keluar 2 -> 40, 50 -> 60)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-mono">
+            <div class="flex justify-between mb-1">
+              <span>Front Index:</span>
+              <b id="simQueueFrontVal" class="text-blue-500 font-bold">0</b>
+            </div>
+            <div class="flex justify-between mb-1">
+              <span>NEF (Jumlah Data):</span>
+              <b id="simQueueNefVal" class="text-teal-500 font-bold">0</b>
+            </div>
+            <div class="flex justify-between">
+              <span>Next Insert Slot:</span>
+              <b id="simQueueNextSlotVal" class="text-emerald-500 font-bold">0</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Slot Container -->
+        <div class="lg:col-span-7 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between">
+          <div class="mb-2 flex justify-between items-center text-xs font-mono text-slate-500">
+            <span>Visualisasi Slot Array (Kapasitas = 5)</span>
+            <span id="simQueueActionLog" class="text-teal-500 font-bold">Mode: Array Melingkar</span>
+          </div>
+
+          <!-- Slots Container -->
+          <div class="flex items-center justify-center p-4 min-h-[180px]">
+            <div id="queueSlotsContainer" class="flex gap-2 sm:gap-3 items-center">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Explanation bar -->
+          <div id="simQueueExplBox" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 font-mono text-xs text-slate-700 dark:text-slate-300">
+            Jalankan skenario standar untuk melihat bagaimana masukan ke-60 berhasil masuk di slot 0 pada mode melingkar, namun gagal total pada mode naif.
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SLIDE 10: QUEUE LINKED LIST & 2 IF KRITIS -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-3">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Representasi Heap • 6.2.2.6
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Queue dengan Linked List: Peran Tail & 2 IF Kritis
+        </h2>
+        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+          Tanpa pointer <code class="font-mono text-teal-500 font-bold">tail</code>, Enqueue harus menyusuri seluruh list dari awal (<code class="font-mono text-rose-500">O(N)</code>). Dengan tail, Enqueue seketika (<code class="font-mono text-emerald-500 font-bold">O(1)</code>).
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- Code Column -->
+        <div class="lg:col-span-7 bg-slate-900 rounded-2xl p-4 border border-slate-800 shadow-xl font-mono text-xs sm:text-[13px] text-slate-200 leading-relaxed">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>queue_list.cpp</span>
+            <span class="text-teal-400 font-bold">Dua Percabangan IF Kritis</span>
+          </div>
+<pre><code><span class="text-purple-400">struct</span> <span class="text-teal-400">queue_l</span> {
+    <span class="text-teal-400">node_t</span> *head; <span class="text-slate-500">// ujung keluar (Dequeue)</span>
+    <span class="text-teal-400">node_t</span> *tail; <span class="text-slate-500">// ujung masuk (Enqueue)</span>
+    <span class="text-emerald-400">int</span> nef;
+};
+
+<span class="text-purple-400">bool</span> RMasuk(<span class="text-teal-400">queue_l</span> &Q, <span class="text-emerald-400">int</span> x) {
+    <span class="text-teal-400">node_t</span> *b = <span class="text-purple-400">new</span> <span class="text-teal-400">node_t</span>;
+    b->data = x; b->next = <span class="text-purple-400">nullptr</span>;
+    <span class="text-purple-400">if</span> (Q.head == <span class="text-purple-400">nullptr</span>) {
+        Q.head = b; Q.tail = b; <span class="text-slate-500">// IF KRITIS 1: queue kosong</span>
+    } <span class="text-purple-400">else</span> {
+        Q.tail->next = b; Q.tail = b;
+    }
+    Q.nef++; <span class="text-purple-400">return true</span>;
+}
+
+<span class="text-purple-400">bool</span> RKeluar(<span class="text-teal-400">queue_l</span> &Q, <span class="text-emerald-400">int</span> &x) {
+    <span class="text-purple-400">if</span> (Q.head == <span class="text-purple-400">nullptr</span>) <span class="text-purple-400">return false</span>;
+    <span class="text-teal-400">node_t</span> *b = Q.head;
+    x = b->data;
+    Q.head = b->next;
+    <span class="text-purple-400">if</span> (Q.head == <span class="text-purple-400">nullptr</span>) Q.tail = <span class="text-purple-400">nullptr</span>; <span class="text-slate-500">// IF KRITIS 2!</span>
+    <span class="text-purple-400">delete</span> b;
+    Q.nef--; <span class="text-purple-400">return true</span>;
+}</code></pre>
+        </div>
+
+        <!-- Two Critical IFs Breakdown -->
+        <div class="lg:col-span-5 space-y-3 text-xs sm:text-sm">
+          <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800">
+            <h4 class="font-bold text-rose-800 dark:text-rose-200 mb-1 flex items-center gap-1.5">
+              <span>⚠️</span> IF Kritis 1: RMasuk Saat List Kosong
+            </h4>
+            <p class="text-rose-900 dark:text-rose-300 leading-relaxed text-xs">
+              Saat queue kosong, baik <code class="font-mono">head</code> maupun <code class="font-mono">tail</code> wajib menunjuk node yang sama (<code class="font-mono">b</code>). Tanpa baris ini, <code class="font-mono">tail->next</code> pada operasi berikutnya akan membaca pointer liar (crash / segfault).
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800">
+            <h4 class="font-bold text-amber-800 dark:text-amber-200 mb-1 flex items-center gap-1.5">
+              <span>⚠️</span> IF Kritis 2: RKeluar Saat Node Terakhir Diambil
+            </h4>
+            <p class="text-amber-900 dark:text-amber-300 leading-relaxed text-xs">
+              Jika node yang dihapus adalah satu-satunya elemen tersisa, <code class="font-mono">head</code> menjadi <code class="font-mono">nullptr</code>. Maka <code class="font-mono">tail</code> <b>wajib dikembalikan ke nullptr</b>! Tanpa baris ini, tail menjadi *dangling pointer* yang menunjuk alamat memori yang sudah di-delete.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SLIDE 11: SIMULATOR QUEUE LINKED LIST -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-3 flex justify-between items-center">
+        <div>
+          <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+            Simulator Dinamis • 6.2.2.6
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            Simulator Queue Linked List & Pelacakan Head/Tail
+          </h2>
+        </div>
+        <div id="simQListBadge" class="px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-xs font-mono font-bold">
+          Head: nullptr • Tail: nullptr • NEF: 0
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <!-- Control Panel -->
+        <div class="lg:col-span-5 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">Operasi Queue di Heap:</h4>
+            
+            <div class="flex gap-2">
+              <input id="qListInputValue" type="number" value="77" class="w-24 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <button onclick="simQListEnqueue()" class="flex-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+                RMasuk(x)
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="simQListDequeue()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+                RKeluar(x)
+              </button>
+              <button onclick="simQListReset()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-rose-100 rounded-xl font-bold text-sm text-rose-600 dark:text-rose-400 transition">
+                Kosongkan
+              </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200 dark:border-slate-800">
+              <span class="text-xs text-slate-500 font-semibold mb-1 block">Skenario Pembuktian:</span>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button onclick="simQListTestSingleNode()" class="px-2.5 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-teal-100 dark:hover:bg-teal-900/40 rounded-lg font-mono text-left">
+                  1. Uji 1 Node (Head==Tail)
+                </button>
+                <button onclick="simQListTestEmptyTailBug()" class="px-2.5 py-1.5 text-xs bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 rounded-lg font-mono text-left">
+                  2. Efek Lupa Reset Tail
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 text-xs text-teal-900 dark:text-teal-200">
+            ⚖️ <b>Allocation Balance:</b> Terpantau secara realtime. Tiap node dialokasikan melalui <code class="font-mono">new node_t</code> dan dibebaskan seketika oleh <code class="font-mono">delete</code> pada Dequeue.
+          </div>
+        </div>
+
+        <!-- Visual Canvas Column -->
+        <div class="lg:col-span-7 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between">
+          <div class="mb-2 flex justify-between items-center text-xs font-mono text-slate-500">
+            <span>Visualisasi Rantai Node Heap</span>
+            <span id="simQListActionLog" class="text-teal-500 font-bold">List Kosong (nullptr)</span>
+          </div>
+
+          <!-- Dynamic SVG/Node Container -->
+          <div class="flex items-center justify-center p-4 min-h-[180px] overflow-x-auto">
+            <div id="qListVisualContainer" class="flex gap-4 items-center">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Expl Box -->
+          <div id="simQListExplBox" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 font-mono text-xs text-slate-700 dark:text-slate-300">
+            Perhatikan bagaimana pointer <code class="text-blue-400">head</code> dan <code class="text-teal-400">tail</code> berkoordinasi saat node bertambah dan berkurang.
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SLIDE 12: NERACA ONGKOS, MEMORI & 6 KESALAHAN LAB -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-3">
+        <span class="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800">
+          Evaluasi Laboratorium • 6.6 & 6.7
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
+          Neraca Biaya O(1), Analisis Memori, & 6 Kesalahan Klasik
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+          Seluruh operasi inti berjalan dalam <code class="font-mono text-emerald-500 font-bold">O(1)</code>. Pilihan representasi bukan soal kecepatan komputasi.
+        </p>
+      </div>
+
+      <!-- Cost Table & Memory Analysis -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-3">
+        <div class="lg:col-span-7 overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-800 shadow-sm text-xs">
+          <table class="w-full text-left bg-white dark:bg-slate-900">
+            <thead class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+              <tr>
+                <th class="p-2 font-bold">Operasi</th>
+                <th class="p-2 font-bold text-blue-600 dark:text-blue-400">Array Statis</th>
+                <th class="p-2 font-bold text-teal-600 dark:text-teal-400">Linked List</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
+              <tr>
+                <td class="p-2 font-sans font-semibold">Push / Enqueue</td>
+                <td class="p-2 text-emerald-500 font-bold">O(1) <span class="text-[10px] text-slate-400 font-sans">(perlu modulo)</span></td>
+                <td class="p-2 text-emerald-500 font-bold">O(1) <span class="text-[10px] text-slate-400 font-sans">(wajib tail)</span></td>
+              </tr>
+              <tr>
+                <td class="p-2 font-sans font-semibold">Pop / Dequeue</td>
+                <td class="p-2 text-emerald-500 font-bold">O(1)</td>
+                <td class="p-2 text-emerald-500 font-bold">O(1)</td>
+              </tr>
+              <tr>
+                <td class="p-2 font-sans font-semibold">Kapasitas</td>
+                <td class="p-2 text-amber-500 font-sans">Tetap (KAP)</td>
+                <td class="p-2 text-teal-400 font-sans">Dinamis (RAM)</td>
+              </tr>
+              <tr>
+                <td class="p-2 font-sans font-semibold">Memori / Elemen</td>
+                <td class="p-2 text-emerald-500 font-bold">4 Byte</td>
+                <td class="p-2 text-rose-500 font-bold">16 Byte <span class="text-[10px] text-slate-400 font-sans">(4x lipat!)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="lg:col-span-5 p-3.5 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 text-xs text-teal-900 dark:text-teal-200 flex flex-col justify-between">
+          <p class="leading-relaxed">
+            💡 <b>Kesimpulan Strategis:</b> Karena semua operasi inti <code class="font-mono">O(1)</code>, gunakan <b>Array Statis</b> bila batas data pasti dan ingin hemat memori. Gunakan <b>Linked List</b> bila data sering tumbuh dinamis melebihi kapasitas awal.
+          </p>
+        </div>
+      </div>
+
+      <!-- 6 Errors Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-3 text-[11px]">
+        <div class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <b class="text-rose-500 block mb-0.5">1. Push Penuh</b>
+          <span class="text-slate-500">Tulis a[KAP]. Tolak jika SPenuh.</span>
+        </div>
+        <div class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <b class="text-rose-500 block mb-0.5">2. Pop Kosong</b>
+          <span class="text-slate-500">Baca a[-1]. Tolak jika SKosong.</span>
+        </div>
+        <div class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <b class="text-rose-500 block mb-0.5">3. Tanpa Modulo</b>
+          <span class="text-slate-500">Kotak mati. Wajib (front+nef)%KAP.</span>
+        </div>
+        <div class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <b class="text-rose-500 block mb-0.5">4. Lupa Tail Awal</b>
+          <span class="text-slate-500">Set head=b & tail=b saat kosong.</span>
+        </div>
+        <div class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <b class="text-rose-500 block mb-0.5">5. Lupa Tail Null</b>
+          <span class="text-slate-500">Set tail=nullptr saat node habis.</span>
+        </div>
+        <div class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <b class="text-rose-500 block mb-0.5">6. Memory Leak</b>
+          <span class="text-slate-500">Simpan next sebelum delete.</span>
+        </div>
+      </div>
+
+      <!-- Golden Rule -->
+      <div class="p-3.5 rounded-xl bg-gradient-to-r from-teal-500/10 to-blue-500/10 border-2 border-emerald-500/40 text-center text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-bold">
+        "Tulis pemeriksaan kondisi batas LEBIH DULU sebelum badan fungsi. Kondisi batas yang ditunda adalah kondisi batas yang terlupa."
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAVIGATION FOOTER -->
+  <footer class="h-16 border-t border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-6 flex items-center justify-between z-30 shrink-0 select-none">
+    <div class="flex items-center space-x-3 text-xs text-slate-500 dark:text-slate-400">
+      <span class="hidden sm:inline">Navigasi:</span>
+      <span class="inline-flex items-center gap-1"><kbd class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[11px]">←</kbd> Prev</span>
+      <span class="inline-flex items-center gap-1"><kbd class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[11px]">→</kbd> / <kbd class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[11px]">Space</kbd> Next</span>
+      <span class="inline-flex items-center gap-1 hidden md:inline-flex"><kbd class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[11px]">M</kbd> Menu</span>
+      <span class="inline-flex items-center gap-1 hidden md:inline-flex"><kbd class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[11px]">T</kbd> Tema</span>
+    </div>
+
+    <!-- Center Current Slide Name -->
+    <div id="slideFooterTitle" class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 truncate max-w-xs sm:max-w-md hidden sm:block text-center">
+      Cover Presentasi
+    </div>
+
+    <!-- Prev & Next Buttons -->
+    <div class="flex items-center space-x-3">
+      <button id="prevBtn" onclick="prevSlide()" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm transition flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        <span>Sebelumnya</span>
+      </button>
+
+      <button id="nextBtn" onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-teal-500/20 transition flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+        <span>Selanjutnya</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+  </footer>
+
+  <!-- MODAL: TABLE OF CONTENTS (M) -->
+  <div id="slideMenuModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold text-sm">
+            M
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Daftar Slide Presentasi (Total 12 Slide)</h3>
+        </div>
+        <button onclick="toggleSlideMenu()" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div id="slideMenuList" class="p-4 overflow-y-auto space-y-1.5 flex-1 text-sm font-medium">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // State management
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    const slideTitles = ['Cover: Modul 6 ADT Stack & Queue', 'The Why & Standar C++ Prosedural Lab', 'Mental Model: Tumpukan Piring vs Antrean Kasir', 'ADT Stack: Spesifikasi & Representasi Array', 'Simulator: Stack Array & Uji Kondisi Batas', 'Stack Linked List: Mengapa Selalu Ujung Depan?', 'ADT Queue: Dua Ujung & Jebakan Queue Naif', 'Solusi Melingkar (Modulo) & Invarian NEF', 'Simulator: Queue Naif vs Array Melingkar', 'Queue Linked List: Peran Tail & 2 IF Kritis', 'Simulator: Queue Linked List & Pelacakan Tail', 'Neraca Ongkos, Analisis Memori, & 6 Kesalahan Lab'];
+
+    // Navigation functions
+    function showSlide(index) {
+      if (index < 0 || index >= totalSlides) return;
+      
+      slides.forEach((s, i) => {
+        if (i === index) {
+          s.classList.remove('hidden');
+          s.classList.add('slide-enter');
+        } else {
+          s.classList.add('hidden');
+          s.classList.remove('slide-enter');
+        }
+      });
+
+      currentSlide = index;
+      document.getElementById('currentSlideNum').innerText = currentSlide + 1;
+      document.getElementById('progressBar').style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+      
+      document.getElementById('slideFooterTitle').innerText = slideTitles[currentSlide] || ("Slide " + (currentSlide + 1));
+      
+      document.getElementById('prevBtn').disabled = (currentSlide === 0);
+      document.getElementById('nextBtn').disabled = (currentSlide === totalSlides - 1);
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) showSlide(currentSlide - 1);
+    }
+
+    function goToSlide(index) {
+      showSlide(index);
+      const menu = document.getElementById('slideMenuModal');
+      if (!menu.classList.contains('hidden')) toggleSlideMenu();
+    }
+
+    // Modal Table of Contents
+    function toggleSlideMenu() {
+      const modal = document.getElementById('slideMenuModal');
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        renderSlideMenu();
+      }
+    }
+
+    function renderSlideMenu() {
+      const list = document.getElementById('slideMenuList');
+      list.innerHTML = '';
+      slideTitles.forEach((title, idx) => {
+        const item = document.createElement('div');
+        const isActive = (idx === currentSlide);
+        item.className = 'p-3 rounded-xl cursor-pointer flex items-center justify-between transition ' + 
+          (isActive ? 'bg-teal-50 dark:bg-teal-950/70 border border-teal-500 text-teal-800 dark:text-teal-200 font-bold' : 
+                      'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300');
+        item.innerHTML = '<span><b class="font-mono mr-2">' + (idx + 1 < 10 ? '0' : '') + (idx + 1) + '.</b> ' + title + '</span>' +
+          (isActive ? '<span class="text-xs px-2 py-0.5 rounded-full bg-teal-500 text-white">Aktif</span>' : '');
+        item.onclick = () => goToSlide(idx);
+        list.appendChild(item);
+      });
+    }
+
+    // Theme Switcher
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.classList.toggle('dark');
+      localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    // Fullscreen
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      
+      switch (e.key) {
+        case 'ArrowRight':
+        case ' ':
+        case 'PageDown':
+          e.preventDefault();
+          nextSlide();
+          break;
+        case 'ArrowLeft':
+        case 'Backspace':
+        case 'PageUp':
+          e.preventDefault();
+          prevSlide();
+          break;
+        case 'm':
+        case 'M':
+          toggleSlideMenu();
+          break;
+        case 't':
+        case 'T':
+          toggleTheme();
+          break;
+        case 'f':
+        case 'F':
+          toggleFullscreen();
+          break;
+        case 'Home':
+          showSlide(0);
+          break;
+        case 'End':
+          showSlide(totalSlides - 1);
+          break;
+        case 'Escape':
+          const modal = document.getElementById('slideMenuModal');
+          if (!modal.classList.contains('hidden')) toggleSlideMenu();
+          break;
+      }
+    });
+
+    // ==========================================
+    // 1. SIMULATOR LOGIC: STACK ARRAY (Slide 5)
+    // ==========================================
+    const STACK_KAP = 5;
+    let stackData = [];
+
+    function renderStackVisual(highlightIdx = -1) {
+      const container = document.getElementById('stackVisualContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      for (let i = 0; i < STACK_KAP; i++) {
+        const hasVal = (i < stackData.length);
+        const val = hasVal ? stackData[i] : '';
+        const isTop = (hasVal && i === stackData.length - 1);
+        const isHighlight = (i === highlightIdx);
+
+        const slot = document.createElement('div');
+        slot.className = 'w-16 h-24 sm:w-20 sm:h-28 rounded-2xl flex flex-col justify-between items-center p-2 border-2 transition-all ' +
+          (isHighlight ? 'border-amber-400 bg-amber-50 dark:bg-amber-950/50 scale-105' :
+           hasVal ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/60 shadow-md' :
+           'border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 opacity-70');
+
+        slot.innerHTML = `
+          <span class="text-[10px] font-mono font-bold ` + (hasVal ? 'text-blue-600 dark:text-blue-300' : 'text-slate-400') + `">
+            a[` + i + `]
+          </span>
+          <span class="text-xl sm:text-2xl font-black font-mono ` + (hasVal ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600') + `">
+            ` + (hasVal ? val : '—') + `
+          </span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full ` + 
+            (isTop ? 'bg-blue-600 text-white' : 
+             (i === stackData.length ? 'bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-200' : 'invisible')) + `">
+            ` + (isTop ? 'TOP' : (i === stackData.length ? 'NEF' : '.')) + `
+          </span>
+        `;
+        container.appendChild(slot);
+      }
+
+      const badge = document.getElementById('stackStatusBadge');
+      if (!badge) return;
+      const nef = stackData.length;
+      if (nef === 0) {
+        badge.className = 'px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-xs font-mono font-bold text-slate-600 dark:text-slate-300';
+        badge.innerText = 'NEF: 0 / 5 • KOSONG';
+      } else if (nef === STACK_KAP) {
+        badge.className = 'px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/70 border border-rose-300 text-xs font-mono font-bold text-rose-700 dark:text-rose-300';
+        badge.innerText = 'NEF: 5 / 5 • PENUH!';
+      } else {
+        badge.className = 'px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950/70 border border-blue-300 text-xs font-mono font-bold text-blue-700 dark:text-blue-300';
+        badge.innerText = 'NEF: ' + nef + ' / 5 • TERISI';
+      }
+    }
+
+    function simStackPush() {
+      const input = document.getElementById('stackInputValue');
+      const val = parseInt(input.value) || 0;
+      if (stackData.length >= STACK_KAP) {
+        document.getElementById('stackActionLog').innerText = 'DITOLAK: SPenuh(S) == true';
+        document.getElementById('stackExplBox').innerHTML = '<span class="text-rose-500 font-bold">Operasi SPush Ditolak:</span> Stack sudah penuh (nef == 5). Prasyarat SPenuh mencegah kerusakan memori a[5].';
+        return;
+      }
+      stackData.push(val);
+      renderStackVisual(stackData.length - 1);
+      document.getElementById('stackActionLog').innerText = 'SPush Berhasil: ' + val;
+      document.getElementById('stackExplBox').innerHTML = 'S.a[' + (stackData.length - 1) + '] = ' + val + '; S.nef++; Elemen teratas sekarang di indeks ' + (stackData.length - 1) + '.';
+    }
+
+    function simStackPresetPush(val) {
+      document.getElementById('stackInputValue').value = val;
+      simStackPush();
+    }
+
+    function simStackPop() {
+      if (stackData.length === 0) {
+        document.getElementById('stackActionLog').innerText = 'DITOLAK: SKosong(S) == true';
+        document.getElementById('stackExplBox').innerHTML = '<span class="text-rose-500 font-bold">Operasi SPop Ditolak:</span> Stack kosong (nef == 0). Prasyarat SKosong mencegah pembacaan a[-1].';
+        return;
+      }
+      const removed = stackData.pop();
+      renderStackVisual(stackData.length);
+      document.getElementById('stackActionLog').innerText = 'SPop Berhasil: Mengembalikan ' + removed;
+      document.getElementById('stackExplBox').innerHTML = 'S.nef--; x = S.a[' + stackData.length + '] (nilai ' + removed + ' keluar). Nilai di RAM tidak dihapus, hanya nef yang mundur!';
+    }
+
+    function simStackTop() {
+      if (stackData.length === 0) {
+        document.getElementById('stackActionLog').innerText = 'DITOLAK: SKosong(S) == true';
+        document.getElementById('stackExplBox').innerHTML = '<span class="text-rose-500 font-bold">Operasi STop Ditolak:</span> Stack kosong.';
+        return;
+      }
+      const topVal = stackData[stackData.length - 1];
+      document.getElementById('stackActionLog').innerText = 'STop: Nilai Teratas adalah ' + topVal;
+      document.getElementById('stackExplBox').innerHTML = 'Mengintip a[' + (stackData.length - 1) + '] = ' + topVal + '. <b>Stack sama sekali tidak berubah</b> (nef tetap ' + stackData.length + ').';
+    }
+
+    function simStackReset() {
+      stackData = [];
+      renderStackVisual();
+      document.getElementById('stackActionLog').innerText = 'SBuat(S): Stack direset ke nef = 0';
+      document.getElementById('stackExplBox').innerText = 'Stack kembali kosong.';
+    }
+
+    function simStackFillAll() {
+      stackData = [7, 10, 4, 13, 99];
+      renderStackVisual();
+      document.getElementById('stackActionLog').innerText = 'Stack Diisi Penuh 5 Elemen';
+      document.getElementById('stackExplBox').innerText = 'nef = 5. Seluruh kotak array terisi.';
+    }
+
+    function simStackForcePopUnderflow() {
+      if (stackData.length > 0) {
+        alert('Kosongkan stack terlebih dahulu untuk menguji Pop pada stack kosong!');
+        return;
+      }
+      document.getElementById('stackActionLog').innerText = '💥 BAHAYA: Membaca a[-1]!';
+      document.getElementById('stackExplBox').innerHTML = '<span class="text-rose-500 font-bold">Undefined Behavior:</span> Tanpa pemeriksaan if (SKosong(S)), program mengeksekusi S.nef-- (menjadi -1) lalu membaca a[-1]. C++ tidak komplain, tetapi membaca memori liar di luar array yang berisi nilai sampah acak!';
+    }
+
+    function simStackForcePushOverflow() {
+      if (stackData.length < STACK_KAP) {
+        alert('Isi stack sampai penuh (5 elemen) terlebih dahulu!');
+        return;
+      }
+      document.getElementById('stackActionLog').innerText = '💥 BUFFER OVERFLOW: Menulis a[5]!';
+      document.getElementById('stackExplBox').innerHTML = '<span class="text-rose-500 font-bold">Kerusakan Memori:</span> Tanpa pemeriksaan if (SPenuh(S)), program menulis ke a[5]. Karena indeks array sah hanya 0..4, penulisan ini <b>MERUSAK peubah lain</b> di samping array di RAM! Program bisa mati mendadak (Segmentation fault).';
+    }
+
+    // ==========================================
+    // 2. SIMULATOR LOGIC: QUEUE NAIF VS MELINGKAR (Slide 9)
+    // ==========================================
+    const QUEUE_KAP = 5;
+    let simQueueMode = 'circular';
+    let qSlots = [null, null, null, null, null];
+    let qFront = 0;
+    let qRear = 0;
+    let qNef = 0;
+
+    function setSimQueueMode(mode) {
+      simQueueMode = mode;
+      document.getElementById('simQueueModeNaifBtn').className = (mode === 'naif') ? 
+        'px-3 py-1 rounded-lg text-xs font-bold bg-rose-600 text-white shadow-sm transition' : 
+        'px-3 py-1 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900';
+      document.getElementById('simQueueModeCircularBtn').className = (mode === 'circular') ? 
+        'px-3 py-1 rounded-lg text-xs font-bold bg-teal-600 text-white shadow-sm transition' : 
+        'px-3 py-1 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900';
+      
+      resetQueueState();
+      document.getElementById('simQueueActionLog').innerText = 'Mode Berganti ke: ' + (mode === 'naif' ? 'Pendekatan Naif' : 'Array Melingkar (Modulo)');
+      document.getElementById('simQueueExplBox').innerText = (mode === 'naif') ?
+        'Pada mode naif, front dan rear terus maju ke kanan. Setiap Dequeue mematikan kotak di kirinya secara permanen.' :
+        'Pada mode melingkar, indeks dihitung dengan modulo % KAP, sehingga slot di awal bisa dipakai kembali!';
+    }
+
+    function resetQueueState() {
+      qSlots = [null, null, null, null, null];
+      qFront = 0;
+      qRear = 0;
+      qNef = 0;
+      renderQueueSlotsVisual();
+    }
+
+    function renderQueueSlotsVisual(highlightSlot = -1, isError = false) {
+      const container = document.getElementById('queueSlotsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      for (let i = 0; i < QUEUE_KAP; i++) {
+        const val = qSlots[i];
+        const isOccupied = (val !== null);
+        
+        let isDeadSlot = false;
+        if (simQueueMode === 'naif') {
+          if (i < qFront) isDeadSlot = true;
+        }
+
+        const isFrontSlot = (isOccupied && i === qFront);
+        const isHighlight = (i === highlightSlot);
+
+        const slot = document.createElement('div');
+        slot.className = 'w-16 h-24 sm:w-20 sm:h-28 rounded-2xl flex flex-col justify-between items-center p-2 border-2 transition-all ' +
+          (isHighlight && isError ? 'border-rose-500 bg-rose-100 dark:bg-rose-950/70 scale-105' :
+           isHighlight ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/70 scale-105' :
+           isDeadSlot ? 'border-rose-400/60 bg-rose-50/50 dark:bg-rose-950/30 opacity-60' :
+           isOccupied ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/60 shadow-md' :
+           'border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 opacity-70');
+
+        slot.innerHTML = `
+          <div class="flex justify-between w-full items-center">
+            <span class="text-[10px] font-mono font-bold text-slate-500">[` + i + `]</span>
+            ` + (isDeadSlot ? '<span class="text-[9px] font-bold text-rose-500">MATI</span>' : '') + `
+          </div>
+          <span class="text-xl sm:text-2xl font-black font-mono ` + 
+            (isDeadSlot ? 'line-through text-rose-400' : (isOccupied ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600')) + `">
+            ` + (isOccupied ? val : (isDeadSlot ? 'X' : '—')) + `
+          </span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full ` + 
+            (isFrontSlot ? 'bg-blue-600 text-white' : 'invisible') + `">
+            FRONT
+          </span>
+        `;
+        container.appendChild(slot);
+      }
+
+      document.getElementById('simQueueFrontVal').innerText = qFront;
+      document.getElementById('simQueueNefVal').innerText = (simQueueMode === 'naif') ? (qRear - qFront) : qNef;
+      
+      const nextInsert = (simQueueMode === 'naif') ? qRear : ((qFront + qNef) % QUEUE_KAP);
+      document.getElementById('simQueueNextSlotVal').innerText = (nextInsert < QUEUE_KAP) ? nextInsert : 'Luar Batas (' + nextInsert + ')';
+    }
+
+    function simQueueManualEnqueue() {
+      const input = document.getElementById('queueInputValue');
+      const val = parseInt(input.value) || 0;
+
+      if (simQueueMode === 'naif') {
+        if (qRear >= QUEUE_KAP) {
+          document.getElementById('simQueueActionLog').innerText = 'DITOLAK: rear == KAP (5)';
+          document.getElementById('simQueueExplBox').innerHTML = '<span class="text-rose-500 font-bold">Kegagalan Queue Naif:</span> Ditolak karena rear menabrak ujung kanan (rear == 5), padahal ada kotak kosong di depan!';
+          renderQueueSlotsVisual(-1, true);
+          return;
+        }
+        qSlots[qRear] = val;
+        qRear++;
+        renderQueueSlotsVisual(qRear - 1);
+        document.getElementById('simQueueActionLog').innerText = 'Masuk ' + val + ' di slot ' + (qRear - 1);
+      } else {
+        if (qNef >= QUEUE_KAP) {
+          document.getElementById('simQueueActionLog').innerText = 'DITOLAK: QPenuh(Q) (nef == 5)';
+          document.getElementById('simQueueExplBox').innerHTML = '<span class="text-rose-500 font-bold">Queue Benar-Benar Penuh:</span> Seluruh 5 kotak terisi data aktif.';
+          return;
+        }
+        const insertIdx = (qFront + qNef) % QUEUE_KAP;
+        qSlots[insertIdx] = val;
+        qNef++;
+        renderQueueSlotsVisual(insertIdx);
+        document.getElementById('simQueueActionLog').innerText = 'Masuk ' + val + ' di slot ' + insertIdx + ' (Modulo)';
+        document.getElementById('simQueueExplBox').innerHTML = 'Data ' + val + ' mendarat di slot (' + qFront + ' + ' + (qNef-1) + ') % 5 = <b>' + insertIdx + '</b>.';
+      }
+    }
+
+    function simQueueManualDequeue() {
+      if (simQueueMode === 'naif') {
+        if (qFront >= qRear) {
+          document.getElementById('simQueueActionLog').innerText = 'DITOLAK: Queue Kosong';
+          return;
+        }
+        const removed = qSlots[qFront];
+        qSlots[qFront] = null;
+        qFront++;
+        renderQueueSlotsVisual();
+        document.getElementById('simQueueActionLog').innerText = 'Keluar ' + removed + ' dari front lama';
+        document.getElementById('simQueueExplBox').innerHTML = 'Front maju menjadi ' + qFront + '. Kotak di belakangnya menjadi <span class="text-rose-500 font-bold">KOTAK MATI</span>.';
+      } else {
+        if (qNef === 0) {
+          document.getElementById('simQueueActionLog').innerText = 'DITOLAK: QKosong(Q)';
+          return;
+        }
+        const removed = qSlots[qFront];
+        qSlots[qFront] = null;
+        const oldFront = qFront;
+        qFront = (qFront + 1) % QUEUE_KAP;
+        qNef--;
+        renderQueueSlotsVisual();
+        document.getElementById('simQueueActionLog').innerText = 'Keluar ' + removed + ' dari slot ' + oldFront;
+        document.getElementById('simQueueExplBox').innerHTML = 'Nilai ' + removed + ' keluar. Front maju melingkar: (' + oldFront + ' + 1) % 5 = <b>' + qFront + '</b>.';
+      }
+    }
+
+    function simQueueRunStandardScenario() {
+      resetQueueState();
+      document.getElementById('simQueueActionLog').innerText = 'Menjalankan skenario standar...';
+      
+      let step = 0;
+      const steps = [
+        () => { document.getElementById('queueInputValue').value = 10; simQueueManualEnqueue(); },
+        () => { document.getElementById('queueInputValue').value = 20; simQueueManualEnqueue(); },
+        () => { document.getElementById('queueInputValue').value = 30; simQueueManualEnqueue(); },
+        () => { simQueueManualDequeue(); },
+        () => { simQueueManualDequeue(); },
+        () => { document.getElementById('queueInputValue').value = 40; simQueueManualEnqueue(); },
+        () => { document.getElementById('queueInputValue').value = 50; simQueueManualEnqueue(); },
+        () => { document.getElementById('queueInputValue').value = 60; simQueueManualEnqueue(); }
+      ];
+
+      function nextStep() {
+        if (step < steps.length) {
+          steps[step]();
+          step++;
+          setTimeout(nextStep, 550);
+        }
+      }
+      nextStep();
+    }
+
+    // ==========================================
+    // 3. SIMULATOR LOGIC: QUEUE LINKED LIST (Slide 11)
+    // ==========================================
+    let qListNodes = [];
+
+    function renderQListVisual() {
+      const container = document.getElementById('qListVisualContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (qListNodes.length === 0) {
+        container.innerHTML = '<div class="text-slate-400 font-mono text-xs italic py-8">Queue kosong di heap (head == nullptr && tail == nullptr)</div>';
+        document.getElementById('simQListBadge').innerText = 'Head: nullptr • Tail: nullptr • NEF: 0';
+        return;
+      }
+
+      qListNodes.forEach((val, idx) => {
+        const isHead = (idx === 0);
+        const isTail = (idx === qListNodes.length - 1);
+
+        const nodeBox = document.createElement('div');
+        nodeBox.className = 'flex items-center gap-2';
+
+        nodeBox.innerHTML = `
+          <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-teal-500 shadow-lg flex flex-col items-center min-w-[75px]">
+            <div class="flex gap-1 mb-1">
+              ` + (isHead ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-blue-500 text-white font-mono">HEAD</span>' : '') + `
+              ` + (isTail ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-teal-500 text-white font-mono">TAIL</span>' : '') + `
+            </div>
+            <span class="text-xl font-black font-mono text-slate-900 dark:text-white">` + val + `</span>
+            <span class="text-[9px] font-mono text-slate-400 mt-1">node_t</span>
+          </div>
+          ` + (!isTail ? '<span class="text-teal-400 font-black text-lg">➔</span>' : '<span class="text-slate-400 font-mono text-xs">nullptr</span>');
+
+        container.appendChild(nodeBox);
+      });
+
+      document.getElementById('simQListBadge').innerText = 
+        'Head: ' + qListNodes[0] + ' • Tail: ' + qListNodes[qListNodes.length - 1] + ' • NEF: ' + qListNodes.length;
+    }
+
+    function simQListEnqueue() {
+      const input = document.getElementById('qListInputValue');
+      const val = parseInt(input.value) || 0;
+      qListNodes.push(val);
+      renderQListVisual();
+      document.getElementById('simQListActionLog').innerText = 'RMasuk Berhasil: Node ' + val + ' di ujung Tail';
+      document.getElementById('simQListExplBox').innerHTML = 'Alokasi new node_t (' + val + '). ' + 
+        (qListNodes.length === 1 ? '<b>Kasus List Kosong:</b> head dan tail keduanya menunjuk node ini.' : 'tail->next = b; tail = b;');
+    }
+
+    function simQListDequeue() {
+      if (qListNodes.length === 0) {
+        document.getElementById('simQListActionLog').innerText = 'DITOLAK: RKeluar pada List Kosong';
+        return;
+      }
+      const removed = qListNodes.shift();
+      renderQListVisual();
+      document.getElementById('simQListActionLog').innerText = 'RKeluar: Node ' + removed + ' Dihapus';
+      document.getElementById('simQListExplBox').innerHTML = 'Node ' + removed + ' dibebaskan (delete). Head maju ke node berikutnya. ' +
+        (qListNodes.length === 0 ? '<b>Kasus Node Terakhir:</b> head menjadi nullptr, sehingga <b>tail wajib dikembalikan ke nullptr!</b>' : '');
+    }
+
+    function simQListReset() {
+      qListNodes = [];
+      renderQListVisual();
+      document.getElementById('simQListActionLog').innerText = 'Queue Dikosongkan';
+      document.getElementById('simQListExplBox').innerText = 'Seluruh node telah dibebaskan dari heap.';
+    }
+
+    function simQListTestSingleNode() {
+      qListNodes = [7];
+      renderQListVisual();
+      document.getElementById('simQListActionLog').innerText = 'Uji 1 Elemen: Head == Tail';
+      document.getElementById('simQListExplBox').innerHTML = 'Ketika hanya ada 1 elemen di queue, pointer <code class="text-blue-400">head</code> dan <code class="text-teal-400">tail</code> menunjuk ke alamat node fisik yang sama persis.';
+    }
+
+    function simQListTestEmptyTailBug() {
+      document.getElementById('simQListActionLog').innerText = '💥 Efek Lupa Reset Tail ke nullptr';
+      document.getElementById('simQListExplBox').innerHTML = '<span class="text-rose-500 font-bold">Dangling Pointer:</span> Ketika node terakhir didelete dan programmer lupa Q.tail = nullptr, tail masih menunjuk ke memori usang. Operasi Enqueue berikutnya mengeksekusi Q.tail->next = b, yang berarti <b>menulis ke memori yang sudah di-delete</b> (Heap-use-after-free)!';
+    }
+
+    // Initialize first render on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      showSlide(0);
+      renderStackVisual();
+      renderQueueSlotsVisual();
+      renderQListVisual();
+    });
+  </script>
+</body>
+</html>

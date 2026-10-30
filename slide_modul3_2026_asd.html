@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modul 3 (2026): ADT List Representasi Array | Praktikum ASD</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            code: {
+              bg: '#090d16',
+              border: '#1e293b'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['Fira Code', 'JetBrains Mono', 'Consolas', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+    }
+    code, pre, .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .dark ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.7);
+    }
+    .slide-enter {
+      animation: fadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.995); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .slot-cell {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .slot-cell:hover {
+      transform: translateY(-4px);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 h-screen w-screen overflow-hidden flex flex-col justify-between transition-colors duration-300">
+
+  <!-- TOP HEADER / CONTROL BAR -->
+  <header class="h-16 border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-6 flex items-center justify-between z-30 shrink-0 select-none">
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-black text-base shadow-lg shadow-emerald-500/25">
+        M3
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <span>Modul 3: ADT List Representasi Array</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-bold">Edisi 2026</span>
+        </h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Praktikum Algoritma & Struktur Data • C++ Prosedural</p>
+      </div>
+    </div>
+
+    <!-- Center Slide Counter / Progress -->
+    <div class="flex items-center space-x-4">
+      <div class="text-xs sm:text-sm font-bold px-3.5 py-1.5 rounded-full bg-slate-200/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300/60 dark:border-slate-700">
+        Slide <span id="currentSlideNum" class="text-emerald-600 dark:text-emerald-400 font-extrabold">1</span> / <span id="totalSlideNum">16</span>
+      </div>
+      <div class="w-32 sm:w-56 h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300 ease-out" style="width: 6.25%;"></div>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center space-x-2">
+      <!-- Slide Menu / Table of Contents -->
+      <button onclick="toggleSlideMenu()" title="Daftar Slide (M)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button onclick="toggleTheme()" title="Ganti Tema (T)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg id="themeIconSun" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+        <svg id="themeIconMoon" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button onclick="toggleFullscreen()" title="Layar Penuh (F)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE VIEWPORT CONTAINER -->
+  <main id="slideContainer" class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 lg:p-10 flex items-center justify-center relative">
+
+    <!-- ==========================================
+         SLIDE 1: COVER (EDISI 2026)
+         ========================================== -->
+    <div class="slide slide-enter w-full max-w-6xl mx-auto flex flex-col items-center justify-center text-center py-4">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-950/90 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-sm font-bold mb-6 shadow-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+        Modul Praktikum ASD Terbaru • Edisi 2026
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-tight mb-5">
+        Modul 3: <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500">ADT List Representasi Array</span>
+      </h1>
+
+      <p class="text-lg sm:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mb-8 leading-relaxed font-normal">
+        Membangun wadah data dari nol dengan C++ prosedural, memahami misteri Nilai Efektif (<code class="text-emerald-600 dark:text-emerald-400 font-bold font-mono">NEF</code>), menegakkan penolakan prasyarat, dan mengukur biaya operasi nyata.
+      </p>
+
+      <!-- 4 Highlight Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full max-w-5xl mb-8 text-left">
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-emerald-500/20 shadow-md hover:border-emerald-500/50 transition">
+          <div class="text-emerald-500 font-extrabold text-2xl mb-1">01. The Why</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Bongkar alasan kenapa kita dilarang pakai <code class="font-mono text-emerald-500">std::vector</code> di modul ini.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-teal-500/20 shadow-md hover:border-teal-500/50 transition">
+          <div class="text-teal-500 font-extrabold text-2xl mb-1">02. 3 Opsi NEF</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Bencana variabel global & parameter terpisah vs struct penyelamat.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-cyan-500/20 shadow-md hover:border-cyan-500/50 transition">
+          <div class="text-cyan-500 font-extrabold text-2xl mb-1">03. 9 Operasi Dale</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Spesifikasi Dale (2016) lengkap dengan penjaga prasyarat return -1.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-500/20 shadow-md hover:border-amber-500/50 transition">
+          <div class="text-amber-500 font-extrabold text-2xl mb-1">04. Cost Counter</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Visualisasi pergeseran memori step-by-step & rumus biaya terukur.</div>
+        </div>
+      </div>
+
+      <!-- Quick Action -->
+      <div class="flex flex-col sm:flex-row items-center gap-4">
+        <button onclick="nextSlide()" class="px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-xl shadow-emerald-500/30 transition transform hover:-translate-y-0.5 flex items-center gap-3">
+          <span>Mulai Presentasi</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+        </button>
+        <span class="text-xs text-slate-500 dark:text-slate-400">Tekan <kbd class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 font-mono text-xs">Space</kbd> atau <kbd class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 font-mono text-xs">→</kbd> di keyboard</span>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 2: MENGAPA HARUS BELAJAR INI? (THE WHY FOR SEMESTER 3)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-5">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800">
+          The Big Question • Motivasi Belajar
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white mt-2">
+          "Kenapa Harus Bikin List Sendiri Kalau Sudah Ada Wadah Instan?"
+        </h2>
+        <p class="text-base sm:text-xl text-slate-600 dark:text-slate-400 mt-1">
+          Target mahasiswa semester 3: Memahami realita di balik layar sebelum menjadi pengguna buta!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <!-- Reason 1 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-xl mb-3">
+            🏗️
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1. Menjadi Pembuat Wadah, Bukan Sekadar Konsumen</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Di Python atau Java kamu tinggal panggil <code class="font-mono text-emerald-500">list.insert()</code>. Tapi bagaimana wadah itu bekerja di memori fisik? Modul ini mengajarkan cara <b>membangun wadah itu sendiri</b>. Programmer biasa cuma pemakai, Software Engineer mengerti struktur dalamnya!
+          </p>
+        </div>
+
+        <!-- Reason 2 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black text-xl mb-3">
+            ⏱️
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">2. Memahami Biaya Tersembunyi (Hidden Cost)</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Menyisipkan data di awal array kelihatannya sepele (cuma 1 baris kode). Padahal CPU harus <b>mendorong ribuan elemen ke kanan satu per satu</b>! Menghitung biaya pergeseran ini adalah kunci utama mengapa di modul depan kita butuh <b>Linked List</b>.
+          </p>
+        </div>
+
+        <!-- Reason 3 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center font-black text-xl mb-3">
+            🛡️
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">3. Compiler Itu Buta Terhadap Logika</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Banyak mahasiswa mengira: <i>"Kalau kode saya terkompilasi, berarti kodenya benar"</i>. SALAH BESAR! Compiler tidak tahu kalau kamu menaruh NEF di variabel global yang merusak list lain, atau salah memasang parameter. Kita belajar mencegah bug tak kasat mata.
+          </p>
+        </div>
+
+        <!-- Reason 4 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-xl mb-3">
+            🛑
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">4. Disiplin Defensive Programming</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Operasi yang melanggar prasyarat (misal menyisipkan ke list penuh) <b>WAJIB DITOLAK</b> dengan mengembalikan nilai <code class="font-mono text-rose-500 font-bold">-1</code>. Membiarkan operasi ilegal berjalan diam-diam adalah sumber bug tersembunyi yang sulit dilacak.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200 font-medium">
+        💡 <b>Catatan Modul 2026:</b> Seluruh kode ditulis dalam C++ berparadigma prosedural; wadah pustaka standar (<code class="font-mono">std::vector</code>) sengaja <b>dilarang</b> karena kita sedang belajar membangun wadah itu sendiri!
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 3: TUJUAN & BATASAN MODUL (3.1)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-5xl mx-auto py-2">
+      <div class="mb-6">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          Modul 3 Edisi 2026 • 3.1
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Tujuan Pembelajaran & Batasan Modul
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          5 Kompetensi inti yang wajib dikuasai mahasiswa setelah praktikum ini selesai:
+        </p>
+      </div>
+
+      <div class="space-y-3.5 mb-6">
+        <div class="p-4.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-black flex items-center justify-center shrink-0">1</div>
+          <div class="text-sm sm:text-base text-slate-700 dark:text-slate-300">
+            <b>Representasi Record Tunggal:</b> Menuliskan ADT List dengan array dan pencatatnya sebagai satu kesatuan record (<code class="font-mono text-emerald-500">struct list_t</code>).
+          </div>
+        </div>
+
+        <div class="p-4.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-400 font-black flex items-center justify-center shrink-0">2</div>
+          <div class="text-sm sm:text-base text-slate-700 dark:text-slate-300">
+            <b>Implementasi 9 Operasi Dale (2016):</b> Mengimplementasikan seluruh spesifikasi operasi dalam fungsi C++ prosedural.
+          </div>
+        </div>
+
+        <div class="p-4.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400 font-black flex items-center justify-center shrink-0">3</div>
+          <div class="text-sm sm:text-base text-slate-700 dark:text-slate-300">
+            <b>Penegakan Prasyarat (Baris Penjaga):</b> Memastikan operasi yang tidak sah langsung ditolak (<code class="font-mono text-rose-500">return -1</code>), bukan dibiarkan berjalan.
+          </div>
+        </div>
+
+        <div class="p-4.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-black flex items-center justify-center shrink-0">4</div>
+          <div class="text-sm sm:text-base text-slate-700 dark:text-slate-300">
+            <b>Pengukuran Biaya dengan Pencacah:</b> Menghitung langkah pergeseran dan pembandingan nyata lalu mencocokkannya dengan rumus matematis.
+          </div>
+        </div>
+
+        <div class="p-4.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 font-black flex items-center justify-center shrink-0">5</div>
+          <div class="text-sm sm:text-base text-slate-700 dark:text-slate-300">
+            <b>Penyusunan Kasus Uji Kondisi Batas:</b> Merancang kasus uji ekstrem saat list kosong (<code class="font-mono">NEF = 0</code>) dan list penuh (<code class="font-mono">NEF = KAPASITAS</code>).
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs sm:text-sm text-amber-900 dark:text-amber-200 flex items-center gap-3">
+        <span class="text-2xl">⚠️</span>
+        <div><b>Batas Modul Ini:</b> Hanya membahas <b>array statis berkapasitas tetap</b>. Alokasi dinamis (<code class="font-mono">new/delete</code>) dan senarai berantai (linked list) dibahas pada modul berikutnya!</div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 4: MENTAL MODEL: ADT VS ARRAY FISIK
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-5">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          Konsep Teori • Mental Model
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          ADT List (Kontrak) vs Array Fisik (Wadah)
+        </h2>
+        <p class="text-base sm:text-lg text-slate-600 dark:text-slate-400 mt-1">
+          Jangan sampai tertukar antara "Konsep Abstrak" dan "Benda Nyata di Memori":
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+        <!-- ADT -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-blue-500/30 shadow-md">
+          <div class="flex items-center justify-between mb-3">
+            <span class="px-3 py-1 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-black text-sm font-mono">ADT (Abstract Data Type)</span>
+            <span class="text-xs font-bold text-slate-500">Konsep / Kontrak</span>
+          </div>
+          <div class="text-3xl mb-2">📜 Kontrak Tertulis</div>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+            ADT mendefinisikan <b>"Bisa melakukan apa saja?"</b> tanpa peduli bagaimana cara komputer menyimpannya di RAM.
+          </p>
+          <ul class="text-xs sm:text-sm space-y-2 text-slate-600 dark:text-slate-400">
+            <li class="flex items-center gap-2"><span class="text-blue-500 font-bold">✔</span> Menyediakan operasi: Sisip, Hapus, Cari, Cek Penuh/Kosong.</li>
+            <li class="flex items-center gap-2"><span class="text-blue-500 font-bold">✔</span> Pemanggil fungsi tidak perlu tahu apakah di dalam pakai array atau pointer.</li>
+          </ul>
+        </div>
+
+        <!-- Array Fisik -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-emerald-500/30 shadow-md">
+          <div class="flex items-center justify-between mb-3">
+            <span class="px-3 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-black text-sm font-mono">REPRESENTASI ARRAY</span>
+            <span class="text-xs font-bold text-slate-500">Implementasi Fisik</span>
+          </div>
+          <div class="text-3xl mb-2">🧱 Blok Kotak Berjejer</div>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+            Cara nyata mewujudkan ADT List menggunakan kotak memori berkapasitas tetap yang disediakan oleh C++.
+          </p>
+          <ul class="text-xs sm:text-sm space-y-2 text-slate-600 dark:text-slate-400">
+            <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span> Elemen disimpan berdampingan di alamat memori kontigu.</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span> Karena kapasitasnya tetap, kita butuh pencatat: <b>NEF</b>!</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-xs sm:text-sm font-mono text-slate-800 dark:text-slate-200">
+        <b>Analogi Nyata:</b> ADT adalah <i>"Buku Menu Restoran"</i> (menjanjikan hidangan apa saja yang ada). Representasi Array adalah <i>"Dapur Fisik"</i> tempat koki memasaknya!
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 5: MISTERI NEF & KENAPA C++ TIDAK PUNYA FUNGSI HITUNG ISI (3.2.3)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          Dasar Teori 3.2.3 • Anatomi C++
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Mengapa C++ Tidak Punya Fungsi Hitung Isi Array?
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Pertanyaan mahasiswa: <i>"Kenapa gak ada fungsi len(arr) di C++ biar gak usah repot catat NEF?"</i>
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Explanation -->
+        <div class="space-y-3.5 text-sm sm:text-base text-slate-700 dark:text-slate-300">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h4 class="font-bold text-slate-900 dark:text-white mb-1 text-sm flex items-center gap-2">
+              <span class="text-rose-500 font-black">1.</span> Ilusi <code class="font-mono text-rose-500">sizeof(a)</code>
+            </h4>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              Pada array berukuran 8 yang baru diisi 3 elemen: <code class="font-mono">sizeof(a)/sizeof(a[0])</code> tetap menjawab <b>8</b>, bukan 3! Itu menghitung kapasitas kotak yang dipesan, bukan isi data.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h4 class="font-bold text-slate-900 dark:text-white mb-1 text-sm flex items-center gap-2">
+              <span class="text-amber-500 font-black">2.</span> Array Meluruh Menjadi Pointer di Fungsi
+            </h4>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              Begitu array dioper ke fungsi <code class="font-mono">void coba(int arr[])</code>, <code class="font-mono">sizeof(arr)</code> berubah menjadi <b>8 byte</b> (ukuran alamat pointer di OS 64-bit).
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h4 class="font-bold text-slate-900 dark:text-white mb-1 text-sm flex items-center gap-2">
+              <span class="text-blue-500 font-black">3.</span> Array Mentah Berisi Nilai Sampah (*Garbage*)
+            </h4>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              Menebak dari nilai juga mustahil. Array yang belum diisi berisi angka liar seperti <code class="font-mono text-xs text-amber-500">1651076199, 779647075, 0</code>. Angka nol pun bisa jadi data yang sah!
+            </p>
+          </div>
+        </div>
+
+        <!-- Code Block & Comparison -->
+        <div class="space-y-4">
+          <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+            <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+              <span>bukti_memori_sampah.cpp</span>
+              <span class="text-emerald-400">Fakta Nyata</span>
+            </div>
+<pre><code><span class="text-emerald-400">int</span> arr[<span class="text-amber-300">8</span>]; <span class="text-slate-500">// belum diisi</span>
+<span class="text-purple-400">for</span> (<span class="text-emerald-400">int</span> i = <span class="text-amber-300">0</span>; i &lt; <span class="text-amber-300">8</span>; i++) cout &lt;&lt; arr[i] &lt;&lt; <span class="text-amber-200">" "</span>;
+
+<span class="text-slate-500">// Output di terminal:</span>
+<span class="text-rose-400">0 0 10928960 32670 1651076199 779647075 73728 0</span></code></pre>
+          </div>
+
+          <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200 font-medium leading-relaxed">
+            <b>Kesimpulan Modul:</b> NEF bukan tambal sulam untuk fitur C++ yang hilang. <b>NEF adalah fitur itu sendiri</b>, yang kita bangun sendiri agar komputer tahu persis mana kotak yang valid dan mana yang masih sampah!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 6: PILIHAN A — NEF VARIABEL GLOBAL (3.2.2.1)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800">
+          Debat Arsitektur 1 • 3.2.2.1
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          Pilihan A: NEF Sebagai Variabel Global (Masalah Ketergantungan Data)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Kelihatan paling gampang dan ringkas karena parameternya pendek. Tapi inilah potensi masalah yang muncul:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Visual Crash -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-rose-500/40 shadow-sm">
+            <h4 class="font-bold text-rose-600 dark:text-rose-400 text-base mb-2">Apa yang Terjadi Jika Ada 2 List?</h4>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+              List <code class="font-mono text-blue-500 font-bold">p</code> diisi 3 elemen (10, 20, 30). NEF global bernilai 3. Lalu list <code class="font-mono text-purple-500 font-bold">q</code> diisi 1 elemen (99).
+            </p>
+            <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-xs space-y-1.5 text-slate-800 dark:text-slate-200">
+              <div class="text-blue-500 font-bold">p = [10, 20, 30, 32620] (memakai nef = 4)</div>
+              <div class="text-rose-500 font-bold">q = [sampah, sampah, sampah, 99] (memakai nef = 4)</div>
+            </div>
+            <p class="text-xs text-rose-600 dark:text-rose-400 mt-2 font-medium">
+              List <code class="font-mono">q</code> cuma diisi satu elemen, tapi angka 99 mendarat di <code class="font-mono">q[3]</code>! Kedua list rusak dan program tidak mengeluh sama sekali!
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-xs sm:text-sm text-rose-900 dark:text-rose-200 font-bold">
+            🚫 <b>Vonis Resmi Modul:</b> JANGAN DIPAKAI. Variabel global merusak pengujian independen dan membuat prasyarat mustahil ditegakkan!
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>bahaya_pilihan_a.cpp</span>
+            <span class="text-rose-400">DILARANG</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-emerald-400">int</span> nef = <span class="text-amber-300">0</span>; <span class="text-slate-500">// satu-satunya NEF di seluruh program</span>
+
+<span class="text-emerald-400">int</span> <span class="text-blue-400">InsertItem</span>(<span class="text-emerald-400">int</span> elemen[], <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (nef == KAPASITAS) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    elemen[nef] = x;
+    nef++; <span class="text-slate-500">// Siapa yang punya NEF ini? Semua list berebut!</span>
+    <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}
+
+<span class="text-slate-500">// Di main():</span>
+<span class="text-emerald-400">int</span> p[KAPASITAS], q[KAPASITAS];
+InsertItem(p, <span class="text-amber-300">10</span>); InsertItem(p, <span class="text-amber-300">20</span>); InsertItem(p, <span class="text-amber-300">30</span>);
+InsertItem(q, <span class="text-amber-300">99</span>); <span class="text-slate-500">// 99 masuk ke q[3]!! q[0..2] berisi sampah!</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 7: PILIHAN B — NEF SEBAGAI PARAMETER (3.2.2.2)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800">
+          Debat Arsitektur 2 • 3.2.2.2
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          Pilihan B: NEF Sebagai Parameter Terpisah (<code class="font-mono text-amber-500">int &nef</code>)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Bisa dipakai jika tidak mau pakai struct. Tapi ada cacat fatal yang tidak bisa ditangkap compiler:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Explanation -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base mb-2">Dua Hal Teknis C++:</h4>
+            <ul class="text-xs sm:text-sm space-y-2 text-slate-600 dark:text-slate-400">
+              <li>• <b>Wajib pakai tanda &</b>: <code class="font-mono text-amber-500">int &nef</code>. Tanpa tanda ampersand, fungsi cuma menerima salinan, nilai di pemanggil tetap 0.</li>
+              <li>• <b>Array tidak butuh tanda &</b>: Parameter array otomatis meluruh menjadi pointer ke elemen pertama.</li>
+            </ul>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500/50 shadow-sm">
+            <h4 class="font-bold text-amber-700 dark:text-amber-300 text-base mb-1">Cacat Fatal: Salah Pasang Parameter!</h4>
+            <code class="text-xs sm:text-sm font-mono text-rose-600 dark:text-rose-400 block p-2.5 rounded-lg bg-amber-100/60 dark:bg-amber-900/40 my-2 font-bold">
+              InsertItem(p, nefQ, 77); // array milik p, pencatat milik q!
+            </code>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Compiler tidak tahu bahwa <code class="font-mono">p</code> harus berpasangan dengan <code class="font-mono">nefP</code>. Kode salah ini <b>tetap lolos kompilasi tanpa warning</b>! Nilai 77 menimpa data di array <code class="font-mono">p</code>, tapi yang bertambah malah <code class="font-mono">nefQ</code>!
+            </p>
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>salah_pasang_parameter.cpp</span>
+            <span class="text-amber-400">RAWAN BUG</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-emerald-400">int</span> <span class="text-blue-400">InsertItem</span>(<span class="text-emerald-400">int</span> elemen[], <span class="text-emerald-400">int</span> &nef, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (nef == KAPASITAS) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    elemen[nef] = x;
+    nef++;
+    <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}
+
+<span class="text-slate-500">// Bahaya nyata di kode pemanggil:</span>
+<span class="text-emerald-400">int</span> p[KAPASITAS], q[KAPASITAS];
+<span class="text-emerald-400">int</span> nefP = <span class="text-amber-300">0</span>, nefQ = <span class="text-amber-300">0</span>;
+
+InsertItem(p, nefP, <span class="text-amber-300">10</span>);
+InsertItem(p, nefP, <span class="text-amber-300">20</span>);
+
+<span class="text-slate-500">// Typo: memasangkan p dengan nefQ!</span>
+InsertItem(p, <span class="text-rose-400 font-bold">nefQ</span>, <span class="text-amber-300">77</span>); <span class="text-slate-500">// Lolos kompilasi!!</span>
+<span class="text-slate-500">// Hasil: p[1] tertimpa 77, nefQ jadi 1 padahal q kosong!</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 8: PILIHAN C — NEF DI DALAM STRUCT (3.2.2.3)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800">
+          Solusi Resmi • 3.2.2.3
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          Pilihan C: NEF Menjadi Elemen dalam Struct (Pemenang Mutlak!)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Satukan array dan pencatatnya dalam satu rumah bernama record / struct.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Explanation -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-emerald-500/50 shadow-md">
+            <h4 class="font-bold text-emerald-600 dark:text-emerald-400 text-lg mb-2 flex items-center gap-2">
+              <span>🏆</span> Kenapa Pilihan C Sempurna?
+            </h4>
+            <ul class="text-xs sm:text-sm space-y-2.5 text-slate-600 dark:text-slate-300">
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><b>Mustahil Salah Pasang:</b> Tidak ada lagi 2 parameter terpisah. Array dan NEF selalu bepergian bersama dalam satu objek <code class="font-mono text-emerald-500">list_t</code>.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><b>Zero Runtime Overhead:</b> Tidak menambah biaya eksekusi apa pun. Jumlah langkah operasi sama persis dengan Pilihan B.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><b>Pass by Reference (<code class="font-mono">&L</code>):</b> Dioper menggunakan tanda ampersand sehingga tidak ada penyalinan data yang boros memori.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-xs sm:text-sm font-mono text-slate-800 dark:text-slate-200">
+            <b>Prinsip Desain:</b> Mencegah kesalahan bukan dengan berharap programmer lebih hati-hati, melainkan dengan membuat bentuk kodenya <i>mustahil untuk salah</i>!
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>representasi_struct_resmi.cpp</span>
+            <span class="text-emerald-400">Standar Praktikum 2026</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-purple-400">const</span> <span class="text-emerald-400">int</span> KAPASITAS = <span class="text-amber-300">8</span>;
+
+<span class="text-purple-400">struct</span> <span class="text-teal-400">list_t</span> {
+    <span class="text-emerald-400">int</span> elemen[KAPASITAS]; <span class="text-slate-500">// tempat menyimpan data</span>
+    <span class="text-emerald-400">int</span> nef;               <span class="text-slate-500">// berapa yang sedang terisi</span>
+};
+
+<span class="text-emerald-400">int</span> <span class="text-blue-400">InsertItem</span>(list_t &L, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (L.nef == KAPASITAS) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    L.elemen[L.nef] = x;
+    L.nef++;
+    <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}
+
+<span class="text-slate-500">// Di main(): Bersih dan mustahil salah pasang!</span>
+list_t p, q;
+p.nef = <span class="text-amber-300">0</span>; q.nef = <span class="text-amber-300">0</span>;
+InsertItem(p, <span class="text-amber-300">10</span>);
+InsertItem(q, <span class="text-amber-300">99</span>);</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 9: 9 OPERASI DALE — OPERASI STATUS O(1) (3.2.4.1)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          Spesifikasi Dale (2016) • Bagian 1
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Operasi Status Berbiaya 1 Langkah: O(1)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Keempat operasi ini hanya menyentuh NEF, tidak pernah menyentuh isi array.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Code snippets -->
+        <div class="space-y-3 font-mono text-xs sm:text-sm">
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-emerald-600 dark:text-emerald-400 font-bold block mb-1">// 1. Mengosongkan List</span>
+            <code class="text-slate-800 dark:text-slate-200 font-bold">void MakeEmpty(list_t &L) { L.nef = 0; }</code>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-teal-600 dark:text-teal-400 font-bold block mb-1">// 2. Mengecek Apakah Kosong</span>
+            <code class="text-slate-800 dark:text-slate-200 font-bold">bool IsEmpty(const list_t &L) { return L.nef == 0; }</code>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-cyan-600 dark:text-cyan-400 font-bold block mb-1">// 3. Mengecek Apakah Penuh</span>
+            <code class="text-slate-800 dark:text-slate-200 font-bold">bool IsFull(const list_t &L) { return L.nef == KAPASITAS; }</code>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-blue-600 dark:text-blue-400 font-bold block mb-1">// 4. Mengetahui Jumlah Elemen Terisi</span>
+            <code class="text-slate-800 dark:text-slate-200 font-bold">int LengthIs(const list_t &L) { return L.nef; }</code>
+          </div>
+        </div>
+
+        <!-- Explanations -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500/40 shadow-sm">
+            <h4 class="font-bold text-amber-700 dark:text-amber-300 text-base mb-1">Kenapa MakeEmpty Tidak Menolkan Array?</h4>
+            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              Yang menentukan ada tidaknya sebuah elemen adalah <b>NEF</b>, bukan isi kotaknya! Jika kamu menolkan seluruh array dengan looping, biaya operasi melonjak dari <b>1 langkah menjadi 8 langkah</b> sia-sia tanpa manfaat apa pun.
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border-2 border-blue-500/40 shadow-sm">
+            <h4 class="font-bold text-blue-700 dark:text-blue-300 text-base mb-1">Peran Kata Kunci <code class="font-mono">const</code></h4>
+            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              Perhatikan kata <code class="font-mono font-bold text-blue-500">const</code> pada tiga fungsi terakhir. Operasi yang hanya membaca menyatakan dirinya tidak mengubah data. Compiler akan langsung menolak jika kita tidak sengaja menulis ke dalamnya!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 10: RETRIEVEITEM & JEBAKAN BATAS LOOP (3.2.4.2)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          Spesifikasi Dale (2016) • Bagian 2
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          RetrieveItem: Pencarian Linear & Jebakan Maut
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Mencari indeks elemen pertama yang bernilai <code class="font-mono text-emerald-500">x</code>, atau mengembalikan <code class="font-mono text-rose-500">-1</code> jika tidak ditemukan.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Code & Trap -->
+        <div class="space-y-4">
+          <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+            <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+              <span>RetrieveItem.cpp</span>
+              <span class="text-emerald-400">Dale (2016)</span>
+            </div>
+<pre><code><span class="text-emerald-400">int</span> <span class="text-blue-400">RetrieveItem</span>(<span class="text-purple-400">const</span> list_t &L, <span class="text-emerald-400">int</span> x) {
+    <span class="text-slate-500">// BATASNYA L.nef, BUKAN KAPASITAS!</span>
+    <span class="text-purple-400">for</span> (<span class="text-emerald-400">int</span> i = <span class="text-amber-300">0</span>; i &lt; L.nef; i++) {
+        <span class="text-purple-400">if</span> (L.elemen[i] == x) <span class="text-purple-400">return</span> i;
+    }
+    <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>; <span class="text-slate-500">// Tidak ditemukan</span>
+}</code></pre>
+          </div>
+
+          <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-500/40 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+            <div class="font-bold text-rose-600 dark:text-rose-400 mb-1 flex items-center gap-2">
+              <span>⚠️</span> Jebakan yang Paling Sering Terjadi di Lab:
+            </div>
+            Menulis <code class="font-mono text-rose-500">i < KAPASITAS</code>. Program tetap terkompilasi, tetapi ikut membandingkan kotak di sebelah kanan NEF yang berisi nilai sampah/bekas hapus! Akibatnya fungsi bisa mengembalikan indeks elemen yang sudah dihapus.
+          </div>
+        </div>
+
+        <!-- Cost Table -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <h4 class="font-bold text-slate-900 dark:text-white text-base mb-3">Tabel Kasus & Biaya Pembandingan</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs font-mono">
+              <thead>
+                <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-400">
+                  <th class="pb-2">Keadaan Kasus</th>
+                  <th class="pb-2">Biaya Nyata</th>
+                  <th class="pb-2">Rumus</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                <tr>
+                  <td class="py-2.5">Ketemu di indeks 2 (NEF = 4)</td>
+                  <td class="py-2.5 text-emerald-500 font-bold">3 pembandingan</td>
+                  <td class="py-2.5 text-slate-500">i + 1</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5">Nilai tidak ada (NEF = 4)</td>
+                  <td class="py-2.5 text-amber-500 font-bold">4 pembandingan</td>
+                  <td class="py-2.5 text-slate-500">NEF</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5">Nilai tidak ada (List penuh = 8)</td>
+                  <td class="py-2.5 text-rose-500 font-bold">8 pembandingan</td>
+                  <td class="py-2.5 text-slate-500">NEF</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5">List kosong (NEF = 0)</td>
+                  <td class="py-2.5 text-blue-500 font-bold">0 pembandingan</td>
+                  <td class="py-2.5 text-slate-500">0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 11: INSERTITEM VS INSERTAT (3.2.4.3 & 3.2.4.4)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          Spesifikasi Dale (2016) • Bagian 3
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          InsertItem (Sisip Akhir) vs InsertAt (Sisip Indeks)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Dua metode penyisipan dengan konsekuensi biaya yang sangat berbeda.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- InsertItem -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">InsertItem (Akhir)</h4>
+            <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-600 text-xs font-mono font-bold">Biaya: 0 Geser</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            Menaruh data langsung di posisi <code class="font-mono">elemen[nef]</code>. Wajib ada penjaga <code class="font-mono text-rose-500">if (IsFull(L)) return -1;</code>.
+          </p>
+          <div class="bg-slate-900 rounded-xl p-3 font-mono text-xs text-slate-200">
+<pre><code><span class="text-emerald-400">int</span> <span class="text-blue-400">InsertItem</span>(list_t &L, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (IsFull(L)) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    L.elemen[L.nef] = x;
+    L.nef++;
+    <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- InsertAt -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">InsertAt (Posisi Tertentu)</h4>
+            <span class="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-600 text-xs font-mono font-bold">Biaya: NEF - pos Geser</span>
+          </div>
+          <div class="bg-slate-900 rounded-xl p-3 font-mono text-xs text-slate-200">
+<pre><code><span class="text-emerald-400">int</span> <span class="text-blue-400">InsertAt</span>(list_t &L, <span class="text-emerald-400">int</span> pos, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (IsFull(L)) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    <span class="text-purple-400">if</span> (pos &lt; <span class="text-amber-300">0</span> || pos &gt; L.nef) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>; <span class="text-slate-500">// &gt; bukan &gt;=</span>
+    <span class="text-purple-400">for</span> (<span class="text-emerald-400">int</span> i = L.nef; i &gt; pos; i--) <span class="text-slate-500">// DARI BELAKANG!</span>
+        L.elemen[i] = L.elemen[i-<span class="text-amber-300">1</span>];
+    L.elemen[pos] = x;
+    L.nef++; <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+        🚨 <b>Kenapa Arah Geser WAJIB dari Belakang?</b> Karena jika digeser dari depan (<code class="font-mono">i = pos; i &lt; nef</code>), elemen ke-1 akan menimpa elemen ke-2 sebelum sempat dipindahkan. Akibatnya, seluruh isi array rusak menjadi satu nilai kembar yang sama! Aturan emas: <b>Selalu bergerak menjauhi elemen kosong.</b>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 12: DELETEAT VS DELETEUNORDERED (3.2.4.5 & 3.2.4.6)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          Spesifikasi Dale (2016) • Bagian 4
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          DeleteAt (Jaga Urutan) vs DeleteUnordered (Cepat)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Dua filosofi penghapusan elemen: Menjaga kerapian antrean vs efisiensi kilat.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- DeleteAt -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">DeleteAt (Jaga Urutan)</h4>
+            <span class="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-600 text-xs font-mono font-bold">Biaya: NEF - pos - 1 Geser</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            Geser <b>DARI DEPAN</b> ke kiri untuk menutup lubang. Digunakan jika urutan data memiliki arti penting (misal: antrean nasabah bank).
+          </p>
+          <div class="bg-slate-900 rounded-xl p-3 font-mono text-xs text-slate-200">
+<pre><code><span class="text-emerald-400">int</span> <span class="text-blue-400">DeleteAt</span>(list_t &L, <span class="text-emerald-400">int</span> pos) {
+    <span class="text-purple-400">if</span> (IsEmpty(L)) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    <span class="text-purple-400">if</span> (pos &lt; <span class="text-amber-300">0</span> || pos &gt;= L.nef) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    <span class="text-purple-400">for</span> (<span class="text-emerald-400">int</span> i = pos; i &lt; L.nef - <span class="text-amber-300">1</span>; i++) <span class="text-slate-500">// DARI DEPAN</span>
+        L.elemen[i] = L.elemen[i+<span class="text-amber-300">1</span>];
+    L.nef--; <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- DeleteUnordered -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">DeleteUnordered (Tanpa Urutan)</h4>
+            <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-600 text-xs font-mono font-bold">Biaya: 0 Geser!</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            Ambil elemen terakhir (<code class="font-mono">elemen[nef-1]</code>), tancapkan langsung ke posisi lubang! Super cepat, tapi mengacak urutan.
+          </p>
+          <div class="bg-slate-900 rounded-xl p-3 font-mono text-xs text-slate-200">
+<pre><code><span class="text-emerald-400">int</span> <span class="text-blue-400">DeleteUnordered</span>(list_t &L, <span class="text-emerald-400">int</span> pos) {
+    <span class="text-purple-400">if</span> (IsEmpty(L)) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    <span class="text-purple-400">if</span> (pos &lt; <span class="text-amber-300">0</span> || pos &gt;= L.nef) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    L.elemen[pos] = L.elemen[L.nef - <span class="text-amber-300">1</span>]; <span class="text-slate-500">// Tutup langsung</span>
+    L.nef--; <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 p-4 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-xs sm:text-sm text-slate-800 dark:text-slate-200">
+        💡 <b>Kapan Boleh DeleteUnordered?</b> Hanya bila urutan tidak dijanjikan oleh spesifikasi (contoh: keranjang belanja, kumpulan ID kartu). Pada daftar yang urutannya bermakna (jadwal kuliah, ranking), fungsi ini merusak integritas data!
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 13: SIMULATOR INTERAKTIF ARRAY ADT LAB
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-1">
+      <div class="mb-3">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800">
+          Laboratorium Interaktif • Visualizer Memori
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
+          Simulator ADT List: Eksekusi 8 Slot Memori Nyata
+        </h2>
+      </div>
+
+      <!-- Simulator Controls & Visual Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-3">
+        <!-- Controls Left -->
+        <div class="lg:col-span-5 space-y-2.5">
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5">
+            <div class="text-xs font-bold text-slate-500 uppercase">Input Operasi</div>
+            <div class="grid grid-cols-2 gap-2">
+              <input type="number" id="inValue" value="42" placeholder="Nilai x" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs">
+              <input type="number" id="inPos" value="0" min="0" max="8" placeholder="Indeks i" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="simInsertItem()" class="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition">
+                InsertItem(x)
+              </button>
+              <button onclick="simInsertAt()" class="py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition">
+                InsertAt(i, x)
+              </button>
+              <button onclick="simDeleteAt()" class="py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition">
+                DeleteAt(i)
+              </button>
+              <button onclick="simDeleteUnordered()" class="py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition">
+                DeleteUnord(i)
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button onclick="simMakeEmpty()" class="py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-300 font-bold text-xs transition">
+                MakeEmpty()
+              </button>
+              <button onclick="simFillSample()" class="py-1.5 px-3 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs transition">
+                Isi Sample (4 data)
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Bar -->
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono space-y-1">
+            <div class="flex justify-between">
+              <span>Status NEF: <b id="simNefVal" class="text-emerald-500 font-bold text-sm">0</b> / 8</span>
+              <span id="simFullTag" class="text-slate-500 font-bold">IsEmpty: true</span>
+            </div>
+            <div class="text-slate-500">Biaya Pergeseran Terakhir: <b id="simCostVal" class="text-amber-500">0 langkah</b></div>
+          </div>
+        </div>
+
+        <!-- Visual Slot Grid Right -->
+        <div class="lg:col-span-7 flex flex-col justify-between">
+          <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl space-y-3">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+              <span>ARRAY ELEMEN[8] (KAPASITAS TETAP = 8):</span>
+              <span class="text-emerald-400">Hijau = Aktif (NEF), Abu = Di Luar Batas</span>
+            </div>
+
+            <!-- 8 Slots Grid -->
+            <div id="simSlotsContainer" class="grid grid-cols-4 sm:grid-cols-8 gap-2 text-center">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Log explanation -->
+            <div id="simActionLog" class="p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-emerald-400 min-h-[50px] flex items-center">
+              List dalam keadaan kosong. Silakan jalankan operasi penyisipan.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 14: PLAYGROUND BENCANA: PILIHAN A & B DEMO
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800">
+          Uji Petaka Lapangan • Bencana Tanpa Warning
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Playground Bencana: Simulasi Kesalahan Pilihan A & B
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Lihat sendiri bagaimana program bisa rusak total tanpa satupun keluhan dari compiler:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Demo Pilihan A -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-rose-500/30 shadow-md space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-rose-600 dark:text-rose-400 text-base">Bencana Pilihan A: Crosstalk Variabel Global</h3>
+            <button onclick="runCrashA()" class="px-3 py-1.5 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 transition">
+              Jalankan Skenario A
+            </button>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            List <code class="font-mono text-blue-500">p</code> diisi [10, 20, 30]. Lalu list <code class="font-mono text-purple-500">q</code> diisi [99].
+          </p>
+          <div id="crashBoxA" class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 font-mono text-xs text-slate-700 dark:text-slate-300 min-h-[90px] flex items-center">
+            Tekan tombol di atas untuk melihat isi memori kedua list hancur.
+          </div>
+        </div>
+
+        <!-- Demo Pilihan B -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-500/30 shadow-md space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-amber-600 dark:text-amber-400 text-base">Bencana Pilihan B: Salah Pasang Parameter</h3>
+            <button onclick="runCrashB()" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition">
+              Jalankan Skenario B
+            </button>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            Memanggil <code class="font-mono text-amber-500 font-bold">InsertItem(p, nefQ, 77);</code> (array milik p, pencatat milik q).
+          </p>
+          <div id="crashBoxB" class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 font-mono text-xs text-slate-700 dark:text-slate-300 min-h-[90px] flex items-center">
+            Tekan tombol di atas untuk melihat data p tertimpa dan q mencatat hantu.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 15: RANGKUMAN BIAYA & MENGAPA LAHIR LINKED LIST (3.2.5)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+          Analisis Algoritmik • 3.2.5
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Rangkuman Biaya Operasi & Jembatan ke Linked List
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Tabel terukur ini adalah alasan mengapa kita tidak bisa mengandalkan array untuk semua masalah:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Table Left -->
+        <div class="lg:col-span-7 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-400">
+                <th class="pb-2">Operasi</th>
+                <th class="pb-2">Biaya pada NEF = 8</th>
+                <th class="pb-2">Langkah Nyata</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+              <tr>
+                <td class="py-2 font-bold">MakeEmpty, IsEmpty, IsFull, LengthIs</td>
+                <td class="py-2 text-emerald-500">1 langkah</td>
+                <td class="py-2 text-slate-500">1</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-bold">Baca elemen ke-i (Akses Acak)</td>
+                <td class="py-2 text-emerald-500">1 langkah</td>
+                <td class="py-2 text-slate-500">1</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-bold">InsertItem (Sisip Akhir)</td>
+                <td class="py-2 text-emerald-500">0 pergeseran</td>
+                <td class="py-2 text-slate-500">0</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-bold">DeleteUnordered (Tanpa Urutan)</td>
+                <td class="py-2 text-emerald-500">0 pergeseran</td>
+                <td class="py-2 text-slate-500">0</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-bold">RetrieveItem (Pencarian)</td>
+                <td class="py-2 text-amber-500">sampai NEF banding</td>
+                <td class="py-2 text-slate-500">8</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-bold text-rose-500">InsertAt indeks 0</td>
+                <td class="py-2 text-rose-500 font-bold">NEF - i geser</td>
+                <td class="py-2 text-rose-500 font-bold">7 pergeseran</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-bold text-rose-500">DeleteAt indeks 0</td>
+                <td class="py-2 text-rose-500 font-bold">NEF - i - 1 geser</td>
+                <td class="py-2 text-rose-500 font-bold">7 pergeseran</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Insight Right -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-500/40 shadow-sm">
+            <h4 class="font-bold text-emerald-700 dark:text-emerald-300 text-base mb-1">Keunggulan Array:</h4>
+            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              Array sangat sakti untuk <b>membaca elemen acak via indeks</b> (<code class="font-mono">elemen[i]</code> hanya 1 langkah $O(1)$) dan menambah elemen di ujung ($O(1)$).
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-500/40 shadow-sm">
+            <h4 class="font-bold text-rose-700 dark:text-rose-300 text-base mb-1">Kelemahan Fatal Array:</h4>
+            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              Array sangat <b>mahal dan lambat</b> ketika harus disisipi atau dihapus di tengah/depan karena seluruh tetangganya harus didorong satu-satu ($O(N)$).
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 text-xs sm:text-sm text-blue-900 dark:text-blue-200 font-medium">
+            🌉 <b>Jembatan ke Modul 4:</b> Inilah alasan mengapa kita akan mempelajari <b>Senarai Berantai (Linked List)</b> minggu depan untuk menyelesaikan masalah pergeseran ini!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 16: 5 KESALAHAN FATAL & KASUS UJI BATAS (3.2.6)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800">
+          Checklist Evaluasi • 3.2.6
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          5 Kesalahan yang Wajib Dihindari & Uji Kondisi Batas
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Daftar kesalahan yang sering terjadi saat praktikum:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-4">
+        <!-- 5 Mistakes -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5">
+          <h4 class="font-bold text-rose-600 dark:text-rose-400 text-base mb-2">5 Kesalahan yang Sering Terjadi:</h4>
+          <div class="text-xs text-slate-600 dark:text-slate-300 space-y-2">
+            <div><b>a. Fungsi int tanpa return di semua jalur:</b> Kompilator -O0 mati crash, di -O2 loop selamanya. Wajib return -1!</div>
+            <div><b>b. Variable Length Array (<code class="font-mono">int arr[n]</code>):</b> Bukan C++ baku. Wajib konstanta: <code class="font-mono">const int KAPASITAS = 8;</code>.</div>
+            <div><b>c. Array dan NEF dibiarkan terpisah:</b> Menimbulkan bug salah pasang parameter tanpa warning.</div>
+            <div><b>d. Batas perulangan memakai KAPASITAS:</b> Seharusnya <code class="font-mono">i &lt; L.nef</code>.</div>
+            <div><b>e. Memakai wadah pustaka standar:</b> Dilarang memakai <code class="font-mono">std::vector</code>.</div>
+          </div>
+        </div>
+
+        <!-- Boundary Test Cases -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5">
+          <h4 class="font-bold text-emerald-600 dark:text-emerald-400 text-base mb-2">Checklist Kasus Uji Batas Wajib:</h4>
+          <div class="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 font-mono">
+            <div class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span> List Kosong (NEF = 0): DeleteAt dan RetrieveItem wajib return -1.</div>
+            <div class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span> List Penuh (NEF = 8): InsertItem dan InsertAt wajib ditolak return -1.</div>
+            <div class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span> Sisip di indeks 0: Geser maksimum (NEF geser).</div>
+            <div class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span> Sisip di indeks NEF: Geser minimum (0 geser).</div>
+            <div class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span> Hapus di indeks 0: Geser maksimum (NEF - 1 geser).</div>
+            <div class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span> Hapus di indeks NEF - 1: Geser minimum (0 geser).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sacred compile command -->
+      <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span class="text-emerald-400 font-bold">Perintah Kompilasi Wajib Lab:</span>
+        <code class="text-amber-300">g++ -std=c++17 -Wall -Wextra -pedantic main.cpp -o main</code>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM CONTROL BAR -->
+  <footer class="h-16 border-t border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-6 flex items-center justify-between z-30 shrink-0 select-none">
+    <div class="flex items-center space-x-2">
+      <button onclick="prevSlide()" class="px-4 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+        <span>Sebelumnya</span>
+      </button>
+
+      <button onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-500/20 transition flex items-center gap-2">
+        <span>Selanjutnya</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+
+    <!-- Quick Slide Indicator Dots -->
+    <div id="slideDotsContainer" class="hidden md:flex items-center space-x-1.5">
+      <!-- Rendered via JS -->
+    </div>
+
+    <div class="text-xs text-slate-400 font-mono hidden sm:block">
+      Navigasi: <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">→</kbd> | Menu: <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">M</kbd>
+    </div>
+  </footer>
+
+  <!-- SLIDE MENU MODAL -->
+  <div id="slideMenuModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <h3 class="font-extrabold text-slate-900 dark:text-white text-base">
+          Daftar Slide Presentasi Modul 3 (2026)
+        </h3>
+        <button onclick="toggleSlideMenu()" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div id="slideMenuList" class="p-4 overflow-y-auto space-y-1">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    const totalSlides = 16;
+    let currentSlide = 0;
+
+    const slideTitles = [
+      "Cover: Modul 3 ADT List Representasi Array (2026)",
+      "Mengapa Harus Belajar Ini? (The Why for Semester 3)",
+      "Tujuan Pembelajaran & Batasan Modul (3.1)",
+      "Mental Model: ADT List (Kontrak) vs Array (Wadah)",
+      "Misteri NEF: Kenapa C++ Tak Punya Fungsi Hitung Isi? (3.2.3)",
+      "Debat Arsitektur 1: Pilihan A — Variabel Global (3.2.2.1)",
+      "Debat Arsitektur 2: Pilihan B — Parameter Terpisah (3.2.2.2)",
+      "Solusi Resmi: Pilihan C — Record / Struct list_t (3.2.2.3)",
+      "Spesifikasi Dale: Operasi Status O(1) (3.2.4.1)",
+      "Spesifikasi Dale: RetrieveItem & Jebakan Loop (3.2.4.2)",
+      "Spesifikasi Dale: InsertItem vs InsertAt (3.2.4.3 & 3.2.4.4)",
+      "Spesifikasi Dale: DeleteAt vs DeleteUnordered (3.2.4.5 & 3.2.4.6)",
+      "Laboratorium Interaktif: Simulator 8 Slot Memori",
+      "Playground Bencana: Demo Crash Pilihan A & B",
+      "Rangkuman Biaya Operasi & Jembatan ke Linked List (3.2.5)",
+      "5 Kesalahan Terlarang & Checklist Kasus Uji Batas (3.2.6)"
+    ];
+
+    function updateSlide() {
+      const slides = document.querySelectorAll('.slide');
+      slides.forEach((s, idx) => {
+        if (idx === currentSlide) {
+          s.classList.remove('hidden');
+          s.classList.add('slide-enter');
+        } else {
+          s.classList.add('hidden');
+          s.classList.remove('slide-enter');
+        }
+      });
+
+      document.getElementById('currentSlideNum').textContent = currentSlide + 1;
+      document.getElementById('totalSlideNum').textContent = totalSlides;
+
+      const progress = ((currentSlide + 1) / totalSlides) * 100;
+      document.getElementById('progressBar').style.width = `${progress}%`;
+
+      renderDots();
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(idx) {
+      if (idx >= 0 && idx < totalSlides) {
+        currentSlide = idx;
+        updateSlide();
+        document.getElementById('slideMenuModal').classList.add('hidden');
+      }
+    }
+
+    function renderDots() {
+      const container = document.getElementById('slideDotsContainer');
+      container.innerHTML = Array.from({ length: totalSlides }).map((_, i) => `
+        <button onclick="goToSlide(${i})" title="${slideTitles[i]}" class="h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-6 bg-emerald-500' : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'}"></button>
+      `).join('');
+    }
+
+    function toggleSlideMenu() {
+      const modal = document.getElementById('slideMenuModal');
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        const listEl = document.getElementById('slideMenuList');
+        listEl.innerHTML = slideTitles.map((t, i) => `
+          <div onclick="goToSlide(${i})" class="py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition ${i === currentSlide ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-700 dark:text-slate-300'}">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs font-mono">${i + 1}</span>
+              <span class="text-xs sm:text-sm">${t}</span>
+            </div>
+            ${i === currentSlide ? '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">Aktif</span>' : ''}
+          </div>
+        `).join('');
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault(); nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') {
+        e.preventDefault(); prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault(); goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault(); goToSlide(totalSlides - 1);
+      } else if (e.key === 'm' || e.key === 'M') {
+        toggleSlideMenu();
+      } else if (e.key === 't' || e.key === 'T') {
+        toggleTheme();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
+    });
+
+    // ==========================================
+    // SIMULATOR ARRAY ADT LOGIC
+    // ==========================================
+    const KAPASITAS = 8;
+    let simList = {
+      elemen: [10, 20, 30, 40, 0, 0, 0, 0],
+      nef: 4
+    };
+    let lastCost = 0;
+
+    function renderSimulator() {
+      document.getElementById('simNefVal').textContent = simList.nef;
+      document.getElementById('simCostVal').textContent = `${lastCost} langkah`;
+
+      const fullTag = document.getElementById('simFullTag');
+      if (simList.nef === 0) {
+        fullTag.className = "text-blue-500 font-bold";
+        fullTag.textContent = "IsEmpty: true";
+      } else if (simList.nef === KAPASITAS) {
+        fullTag.className = "text-rose-500 font-bold";
+        fullTag.textContent = "IsFull: true";
+      } else {
+        fullTag.className = "text-emerald-500 font-bold";
+        fullTag.textContent = `Aktif (${simList.nef} elemen)`;
+      }
+
+      const container = document.getElementById('simSlotsContainer');
+      container.innerHTML = Array.from({ length: KAPASITAS }).map((_, i) => {
+        const isFilled = i < simList.nef;
+        const val = simList.elemen[i];
+        if (isFilled) {
+          return `
+            <div class="slot-cell p-2.5 rounded-xl bg-emerald-500/20 border-2 border-emerald-500 text-emerald-300">
+              <div class="text-[10px] font-mono text-emerald-400 font-bold">[${i}]</div>
+              <div class="text-base font-black my-0.5 text-white">${val}</div>
+              <div class="text-[10px] font-mono text-emerald-400">Valid</div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="slot-cell p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-500 opacity-60">
+              <div class="text-[10px] font-mono text-slate-500">[${i}]</div>
+              <div class="text-base font-mono my-0.5 text-slate-400">${val === 0 ? '?' : val}</div>
+              <div class="text-[10px] font-mono text-slate-600">Garbage</div>
+            </div>
+          `;
+        }
+      }).join('');
+    }
+
+    function simInsertItem() {
+      const x = parseInt(document.getElementById('inValue').value) || 99;
+      if (simList.nef === KAPASITAS) {
+        document.getElementById('simActionLog').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> List sudah penuh (IsFull)! Operasi InsertItem(${x}) dibatalkan.`;
+        lastCost = 0;
+        renderSimulator();
+        return;
+      }
+      simList.elemen[simList.nef] = x;
+      simList.nef++;
+      lastCost = 0;
+      document.getElementById('simActionLog').innerHTML = `<b>✔ InsertItem(${x}) Berhasil:</b> Ditaruh di akhir (indeks ${simList.nef - 1}). Biaya pergeseran = <b>0</b>.`;
+      renderSimulator();
+    }
+
+    function simInsertAt() {
+      const x = parseInt(document.getElementById('inValue').value) || 99;
+      const pos = parseInt(document.getElementById('inPos').value) || 0;
+
+      if (simList.nef === KAPASITAS) {
+        document.getElementById('simActionLog').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> List penuh (IsFull)!`;
+        return;
+      }
+      if (pos < 0 || pos > simList.nef) {
+        document.getElementById('simActionLog').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> Indeks ${pos} di luar jangkauan yang sah (0 s/d ${simList.nef})!`;
+        return;
+      }
+
+      // Geser dari belakang
+      lastCost = simList.nef - pos;
+      for (let i = simList.nef; i > pos; i--) {
+        simList.elemen[i] = simList.elemen[i - 1];
+      }
+      simList.elemen[pos] = x;
+      simList.nef++;
+
+      document.getElementById('simActionLog').innerHTML = `<b>✔ InsertAt(${pos}, ${x}) Berhasil:</b> Menggeser ${lastCost} elemen ke kanan (dari belakang). Biaya = <b>${lastCost}</b> pergeseran (Rumus: NEF - pos).`;
+      renderSimulator();
+    }
+
+    function simDeleteAt() {
+      const pos = parseInt(document.getElementById('inPos').value) || 0;
+      if (simList.nef === 0) {
+        document.getElementById('simActionLog').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> List kosong (IsEmpty)!`;
+        return;
+      }
+      if (pos < 0 || pos >= simList.nef) {
+        document.getElementById('simActionLog').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> Indeks ${pos} tidak sah (harus 0 s/d ${simList.nef - 1})!`;
+        return;
+      }
+
+      lastCost = simList.nef - pos - 1;
+      const val = simList.elemen[pos];
+      for (let i = pos; i < simList.nef - 1; i++) {
+        simList.elemen[i] = simList.elemen[i + 1];
+      }
+      simList.nef--;
+
+      document.getElementById('simActionLog').innerHTML = `<b>✔ DeleteAt(${pos}) Berhasil:</b> Nilai ${val} dihapus. Menggeser ${lastCost} elemen ke kiri (dari depan). Biaya = <b>${lastCost}</b> pergeseran.`;
+      renderSimulator();
+    }
+
+    function simDeleteUnordered() {
+      const pos = parseInt(document.getElementById('inPos').value) || 0;
+      if (simList.nef === 0) {
+        document.getElementById('simActionLog').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> List kosong (IsEmpty)!`;
+        return;
+      }
+      if (pos < 0 || pos >= simList.nef) {
+        document.getElementById('simActionLog').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> Indeks ${pos} tidak sah!`;
+        return;
+      }
+
+      const val = simList.elemen[pos];
+      const lastVal = simList.elemen[simList.nef - 1];
+      simList.elemen[pos] = lastVal;
+      simList.nef--;
+      lastCost = 0;
+
+      document.getElementById('simActionLog').innerHTML = `<b>✔ DeleteUnordered(${pos}) Berhasil:</b> Nilai ${val} digantikan oleh elemen terakhir (${lastVal}). Biaya = <b>0 pergeseran</b>!`;
+      renderSimulator();
+    }
+
+    function simMakeEmpty() {
+      simList.nef = 0;
+      lastCost = 1;
+      document.getElementById('simActionLog').innerHTML = `<b>✔ MakeEmpty():</b> NEF di-set ke 0. Array tidak perlu dinolkan (O(1)).`;
+      renderSimulator();
+    }
+
+    function simFillSample() {
+      simList.elemen = [10, 20, 30, 40, 0, 0, 0, 0];
+      simList.nef = 4;
+      lastCost = 0;
+      document.getElementById('simActionLog').innerHTML = `List diisi 4 elemen contoh: [10, 20, 30, 40].`;
+      renderSimulator();
+    }
+
+    // ==========================================
+    // CRASH DEMO LOGIC
+    // ==========================================
+    function runCrashA() {
+      const box = document.getElementById('crashBoxA');
+      box.className = "p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 font-mono text-xs text-rose-900 dark:text-rose-200 animate-pulse";
+      box.innerHTML = `
+        <div class="font-bold text-rose-500 mb-1">💥 BENCANA CROSSTALK TERJADI:</div>
+        <div>nefGlobal = 4 (karena dipakai bersama p dan q)</div>
+        <div class="mt-1">List p: [10, 20, 30, <span class="text-rose-400 font-bold">32620(sampah)</span>]</div>
+        <div>List q: [<span class="text-rose-400 font-bold">sampah, sampah, sampah, 99</span>]</div>
+        <div class="mt-1 text-[11px] text-rose-400">Angka 99 mendarat di q[3]! Compiler 100% diam tanpa komplain.</div>
+      `;
+    }
+
+    function runCrashB() {
+      const box = document.getElementById('crashBoxB');
+      box.className = "p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 font-mono text-xs text-amber-900 dark:text-amber-200 animate-pulse";
+      box.innerHTML = `
+        <div class="font-bold text-amber-500 mb-1">💥 SALAH PASANG LOLOS KOMPILASI:</div>
+        <div>InsertItem(p, nefQ, 77); // array p, pencatat q</div>
+        <div class="mt-1 text-rose-400 font-bold">Sebelum: p = [10, 20, 30] (nefP=3) | q = [] (nefQ=0)</div>
+        <div class="text-emerald-400 font-bold">Sesudah: p = [77, 20, 30] (nefP=3) | q = [] (nefQ=1)</div>
+        <div class="mt-1 text-[11px] text-amber-400">Nilai 77 menimpa p[0]! nefQ bertambah padahal q tidak dapat apa-apa.</div>
+      `;
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.remove('dark');
+      }
+      updateSlide();
+      renderSimulator();
+    });
+  </script>
+</body>
+</html>

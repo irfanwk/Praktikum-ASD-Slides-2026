@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Praktikum Algoritma & Struktur Data 2026 | Slide Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['Fira Code', 'Consolas', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, .font-mono { font-family: 'Fira Code', monospace; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col justify-between transition-colors duration-300">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur sticky top-0 z-30 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-black text-lg shadow-md shadow-teal-500/20">
+          ASD
+        </div>
+        <div>
+          <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            <span>Praktikum ASD</span>
+            <span class="text-xs px-2.5 py-0.5 rounded-full bg-teal-100 dark:bg-teal-950 border border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 font-bold">Edisi 2026</span>
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Portal Web Slide Presentasi Interaktif • Universitas Pertamina</p>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex items-center space-x-2">
+        <button onclick="toggleTheme()" title="Ganti Tema" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition">
+          <svg id="themeIconSun" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+          <svg id="themeIconMoon" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+        <a href="https://github.com/irfanwk/Praktikum-ASD-Slides-2026" target="_blank" rel="noopener noreferrer" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition" title="Lihat di GitHub">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <main class="max-w-6xl mx-auto px-6 py-10 flex-1 w-full">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-100 dark:bg-teal-950/80 border border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 text-xs font-bold mb-4 shadow-sm">
+        <span>Laboratorium Komputer • Universitas Pertamina</span>
+      </div>
+      <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
+        Slide Presentasi Interaktif <br class="hidden sm:inline">
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-indigo-500 to-purple-500">Algoritma & Struktur Data</span>
+      </h2>
+      <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+        Materi pengajaran modul praktikum berbasis web single-page mandiri, dilengkapi analogi fisik, visualisasi animasi deterministik, analisis ongkos komputasi, dan pendekatan C++ prosedural murni.
+      </p>
+    </div>
+
+    <!-- MODULE CARDS GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- MODUL 3 -->
+      <a href="slide_modul3_2026_asd.html" class="group p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-mono font-bold text-xs">
+              MODUL 03
+            </span>
+            <span class="text-xs text-slate-400 font-mono">16 Slide • Array Statis</span>
+          </div>
+          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-emerald-500 transition mb-2">
+            ADT List Representasi Array Statis
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            Konsep wadah terurut Dale (2016) menggunakan array statis, perdebatan penyimpanan NEF, analisis pergeseran elemen InsertAt / DeleteAt O(N), dan larangan alokasi dinamis.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+          <span>Buka Presentasi</span>
+          <span class="group-hover:translate-x-1 transition-transform">➔</span>
+        </div>
+      </a>
+
+      <!-- MODUL 4 -->
+      <a href="slide_modul4_2026_asd.html" class="group p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-mono font-bold text-xs">
+              MODUL 04
+            </span>
+            <span class="text-xs text-slate-400 font-mono">16 Slide • Linked List</span>
+          </div>
+          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-blue-500 transition mb-2">
+            Singly Linked List & Manajemen Heap
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            Peralihan dari array ke node dinamis di heap, pointer head, penelusuran traversal, 8 operasi standar Dale, serta pembuktian bebas memory leak via Allocation Balance.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
+          <span>Buka Presentasi</span>
+          <span class="group-hover:translate-x-1 transition-transform">➔</span>
+        </div>
+      </a>
+
+      <!-- MODUL 5 -->
+      <a href="slide_w5_varian_linked_list.html" class="group p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-purple-500 dark:hover:border-purple-500 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-mono font-bold text-xs">
+              MODUL 05
+            </span>
+            <span class="text-xs text-slate-400 font-mono">16 Slide • GSAP Engine</span>
+          </div>
+          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-purple-500 transition mb-2">
+            Varian Linked List: Doubly & Circular
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            Pointer dua arah (prev & next), invarian <code class="font-mono text-purple-400">p->next->prev == p</code>, fungsi pemeriksa <code class="font-mono">utuh()</code>, cincin circular berpenunjuk tail, dan simulator GSAP reversibel.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400">
+          <span>Buka Presentasi</span>
+          <span class="group-hover:translate-x-1 transition-transform">➔</span>
+        </div>
+      </a>
+
+      <!-- MODUL 6 -->
+      <a href="slide_w6_stack_queue.html" class="group p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-teal-500 dark:hover:border-teal-500 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 font-mono font-bold text-xs">
+              MODUL 06
+            </span>
+            <span class="text-xs text-slate-400 font-mono">12 Slide • LIFO & FIFO</span>
+          </div>
+          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-teal-500 transition mb-2">
+            ADT Stack & Queue
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            Disiplin akses LIFO dan FIFO, pemecahan kotak mati lewat array melingkar (<code class="font-mono text-teal-400">% KAP</code>), pengamanan kondisi batas, dan peran pointer tail pada queue linked list.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-teal-600 dark:text-teal-400">
+          <span>Buka Presentasi</span>
+          <span class="group-hover:translate-x-1 transition-transform">➔</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- NAVIGATION GUIDE CARD -->
+    <div class="mt-10 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-xs text-slate-600 dark:text-slate-400">
+      <div class="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+        <span>⌨️</span> Pintasan Keyboard Saat Membuka Slide Presentasi:
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 font-mono">
+        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">←</kbd> Slide Lalu</div>
+        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">→</kbd> / <kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">Space</kbd> Lanjut</div>
+        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">M</kbd> Daftar Menu</div>
+        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">T</kbd> Toggle Tema</div>
+        <div><kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">F</kbd> Layar Penuh</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500">
+    <p>Praktikum Algoritma dan Struktur Data (ASD) • Laboratorium Ilmu Komputer Universitas Pertamina</p>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.classList.toggle('dark');
+      localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+    }
+    // Init theme
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+</body>
+</html>

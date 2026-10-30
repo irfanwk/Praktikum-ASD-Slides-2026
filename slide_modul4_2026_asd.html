@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modul 4 (2026): Singly Linked List | Praktikum ASD</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              200: '#99f6e4',
+              300: '#5eead4',
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e4a',
+            },
+            code: {
+              bg: '#080d1a',
+              border: '#1e293b'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['Fira Code', 'JetBrains Mono', 'Consolas', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+    }
+    code, pre, .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .dark ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.7);
+    }
+    .slide-enter {
+      animation: fadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.995); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .node-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .node-card:hover {
+      transform: translateY(-4px);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 h-screen w-screen overflow-hidden flex flex-col justify-between transition-colors duration-300">
+
+  <!-- TOP HEADER / CONTROL BAR -->
+  <header class="h-16 border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-6 flex items-center justify-between z-30 shrink-0 select-none">
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-cyan-500 text-white flex items-center justify-center font-black text-base shadow-lg shadow-teal-500/25">
+        M4
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <span>Modul 4: Singly Linked List</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-teal-100 dark:bg-teal-950 border border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 font-bold">Edisi 2026</span>
+        </h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Praktikum Algoritma & Struktur Data • C++ Prosedural</p>
+      </div>
+    </div>
+
+    <!-- Center Slide Counter / Progress -->
+    <div class="flex items-center space-x-4">
+      <div class="text-xs sm:text-sm font-bold px-3.5 py-1.5 rounded-full bg-slate-200/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300/60 dark:border-slate-700">
+        Slide <span id="currentSlideNum" class="text-teal-600 dark:text-teal-400 font-extrabold">1</span> / <span id="totalSlideNum">16</span>
+      </div>
+      <div class="w-32 sm:w-56 h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-teal-500 to-cyan-400 transition-all duration-300 ease-out" style="width: 6.25%;"></div>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center space-x-2">
+      <!-- Slide Menu / Table of Contents -->
+      <button onclick="toggleSlideMenu()" title="Daftar Slide (M)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button onclick="toggleTheme()" title="Ganti Tema (T)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg id="themeIconSun" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+        <svg id="themeIconMoon" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button onclick="toggleFullscreen()" title="Layar Penuh (F)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE VIEWPORT CONTAINER -->
+  <main id="slideContainer" class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 lg:p-10 flex items-center justify-center relative">
+
+    <!-- ==========================================
+         SLIDE 1: COVER
+         ========================================== -->
+    <div class="slide slide-enter w-full max-w-6xl mx-auto flex flex-col items-center justify-center text-center py-4">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-100 dark:bg-teal-950/90 border border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 text-sm font-bold mb-6 shadow-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-ping"></span>
+        Praktikum Algoritma & Struktur Data • Edisi 2026
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-tight mb-5">
+        Modul 4: <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-cyan-400 to-blue-500">Singly Linked List</span>
+      </h1>
+
+      <p class="text-lg sm:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mb-8 leading-relaxed font-normal">
+        Membebaskan diri dari belenggu memori kontigu array. Membangun senarai berantai, menguasai pointer heap, mengukur hop penelusuran, dan membuktikan zero-leak dengan <code class="text-teal-600 dark:text-teal-400 font-bold font-mono">LeakSanitizer</code>.
+      </p>
+
+      <!-- 4 Highlight Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full max-w-5xl mb-8 text-left">
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-teal-500/20 shadow-md hover:border-teal-500/50 transition">
+          <div class="text-teal-500 font-extrabold text-2xl mb-1">01. The Why</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Kenapa array runtuh saat harus sering disisipi elemen di depan.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-cyan-500/20 shadow-md hover:border-cyan-500/50 transition">
+          <div class="text-cyan-500 font-extrabold text-2xl mb-1">02. Stack vs Heap</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Kepala <code class="font-mono text-cyan-400">list_t</code> di Stack, seluruh <code class="font-mono text-cyan-400">node_t</code> mengapung bebas di Heap.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-blue-500/20 shadow-md hover:border-blue-500/50 transition">
+          <div class="text-blue-500 font-extrabold text-2xl mb-1">03. Hukum Rantai</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Aturan urutan penugasan: Sambung dulu baru putus; simpan dulu baru hapus!</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-500/20 shadow-md hover:border-amber-500/50 transition">
+          <div class="text-amber-500 font-extrabold text-2xl mb-1">04. Leak Hunter</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Kompilasi ketat g++ & deteksi kebocoran memori dengan Allocation Balance.</div>
+        </div>
+      </div>
+
+      <!-- Quick Action -->
+      <div class="flex flex-col sm:flex-row items-center gap-4">
+        <button onclick="nextSlide()" class="px-8 py-4 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-base shadow-xl shadow-teal-500/30 transition transform hover:-translate-y-0.5 flex items-center gap-3">
+          <span>Mulai Presentasi</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+        </button>
+        <span class="text-xs text-slate-500 dark:text-slate-400">Tekan <kbd class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 font-mono text-xs">Space</kbd> atau <kbd class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 font-mono text-xs">→</kbd> di keyboard</span>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 2: THE WHY — MENGAPA TINGGALKAN ARRAY?
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-5">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950/70 border border-teal-300 dark:border-teal-800">
+          The Big Question • Fondasi Berpikir
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white mt-2">
+          "Pekan Lalu Kita Sudah Punya Array, Kenapa Pusing Bikin Linked List?"
+        </h2>
+        <p class="text-base sm:text-xl text-slate-600 dark:text-slate-400 mt-1">
+          Dua kelemahan fisik array yang tidak bisa diperbaiki oleh software engineering apa pun:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <!-- Flaw 1 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-rose-500/30 shadow-md">
+          <div class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center font-black text-xl mb-3">
+            🧱
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1. Kutukan Alamat Kontigu (Harus Berjejer Rapat)</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Array mewajibkan seluruh elemennya bertetangga rapat di alamat memori. Konsekuensinya fatal: menyisipkan 1 data di indeks 0 pada list berisi 10.000 elemen memaksa CPU <b>mendorong 10.000 elemen ke kanan satu demi satu</b> ($O(N)$). Di linked list? Cukup ubah pointer head, selesai dalam <b>0 langkah pergeseran</b> ($O(1)$)!
+          </p>
+        </div>
+
+        <!-- Flaw 2 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-500/30 shadow-md">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black text-xl mb-3">
+            💸
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">2. Pajak Pemborosan & Ongkos Salin Realokasi</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Kalau kapasitas array ditebak terlalu kecil $	o$ crash / harus sewa memori 2x lipat dan menyalin ulang seluruh data lama. Kalau ditebak terlalu besar $	o$ RAM mubazir tak terpakai. Linked list hanya memesan memori <b>persis saat ada data baru masuk</b> dan langsung mengembalikannya saat data dihapus.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 text-xs sm:text-sm text-teal-900 dark:text-teal-200 font-medium">
+        💡 <b>Analogi Ringkas:</b> Array itu seperti ruko berjejer nomor 1 sampai 8; kalau ruko nomor 1 mau diisi toko baru, 7 toko lainnya harus gotong royong pindah sekat. Linked List itu seperti <i>permainan cari harta karun</i>; lokasinya bebas di mana saja di kota, tiap pos cuma mengantongi alamat pos berikutnya!
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 3: EVOLUSI 4 WADAH DATA
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-5">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Modul 4 • 4.1 & 4.2
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Evolusi 4 Wadah Data: Masalah yang Selesai & Tertinggal
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Perjalanan panjang struktur data menyelesaikan masalah kapasitas dan biaya memori:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+        <!-- Container 1 -->
+        <div class="p-4.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tahap 1</div>
+            <h3 class="font-black text-slate-900 dark:text-white text-base mb-2">Array Statis</h3>
+            <code class="text-xs font-mono text-slate-500 block mb-3">int arr[8];</code>
+            <ul class="text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+              <li class="text-emerald-500">✔ Cepat, akses $O(1)$</li>
+              <li class="text-rose-500">✖ Kapasitas kaku di compile-time</li>
+              <li class="text-rose-500">✖ Sisip/hapus mahal $O(N)$</li>
+            </ul>
+          </div>
+          <div class="mt-3 text-[11px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800/80 p-2 rounded-lg">Pekan lalu (Modul 3)</div>
+        </div>
+
+        <!-- Container 2 -->
+        <div class="p-4.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="text-xs font-bold text-teal-500 uppercase tracking-wider mb-1">Tahap 2</div>
+            <h3 class="font-black text-slate-900 dark:text-white text-base mb-2">Array Heap Manual</h3>
+            <code class="text-xs font-mono text-teal-400 block mb-3">int *a = new int[n];</code>
+            <ul class="text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+              <li class="text-emerald-500">✔ Ukuran ditentukan saat runtime</li>
+              <li class="text-rose-500">✖ Begitu diminta, ukuran tak bisa diubah</li>
+              <li class="text-rose-500">✖ Wajib delete[] manual</li>
+            </ul>
+          </div>
+          <div class="mt-3 text-[11px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800/80 p-2 rounded-lg">4 Baris Sakral (4.2.2)</div>
+        </div>
+
+        <!-- Container 3 -->
+        <div class="p-4.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="text-xs font-bold text-cyan-500 uppercase tracking-wider mb-1">Tahap 3</div>
+            <h3 class="font-black text-slate-900 dark:text-white text-base mb-2">Vector (Dynamic Tumbuh)</h3>
+            <code class="text-xs font-mono text-cyan-400 block mb-3">std::vector&lt;int&gt; v;</code>
+            <ul class="text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+              <li class="text-emerald-500">✔ Tumbuh otomatis saat penuh</li>
+              <li class="text-rose-500">✖ Pajak realokasi: 2x doubling copy</li>
+              <li class="text-rose-500">✖ Sisip awal tetap lambat $O(N)$</li>
+            </ul>
+          </div>
+          <div class="mt-3 text-[11px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800/80 p-2 rounded-lg">STL Internal (4.2.3)</div>
+        </div>
+
+        <!-- Container 4 -->
+        <div class="p-4.5 rounded-2xl bg-teal-50/50 dark:bg-teal-950/30 border-2 border-teal-500 shadow-md flex flex-col justify-between">
+          <div>
+            <div class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-1">Tahap 4 (Kini)</div>
+            <h3 class="font-black text-slate-900 dark:text-white text-base mb-2">Singly Linked List</h3>
+            <code class="text-xs font-mono text-teal-600 dark:text-teal-300 block mb-3">node_t + list_t</code>
+            <ul class="text-xs space-y-1.5 text-slate-700 dark:text-slate-300">
+              <li class="text-emerald-600 dark:text-emerald-400 font-bold">✔ Sisip depan $O(1)$ mutlak</li>
+              <li class="text-emerald-600 dark:text-emerald-400 font-bold">✔ Tidak pernah penuh (no capacity)</li>
+              <li class="text-amber-600 dark:text-amber-400">✖ Akses ke-i harus ditelusuri ($O(N)$)</li>
+            </ul>
+          </div>
+          <div class="mt-3 text-[11px] font-mono text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/60 p-2 rounded-lg font-bold">Materi Utama Modul 4</div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-xs sm:text-sm font-mono text-slate-800 dark:text-slate-200">
+        <b>Aturan Pertukaran (Trade-off):</b> Kamu menukar kecepatan akses instan via indeks (<code class="font-mono text-teal-500">arr[i]</code> $O(1)$) untuk mendapatkan kecepatan penyisipan instan di awal ($O(1)$) dan kebebasan memori tanpa batas kapasitas!
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 4: SENJATA LAB — G++ & LEAKSANITIZER
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950/70 border border-teal-300 dark:border-teal-800">
+          Tools & Standar Lab • 4.2.1
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          Senjata Wajib Lab: Kompilasi Ketat g++ & Deteksi Bocor
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Asisten praktikum memeriksa programmu dengan baris perintah ini, bukan tombol "Run" di IDE!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Flags Breakdown -->
+        <div class="space-y-3">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <code class="text-sm font-mono font-bold text-teal-600 dark:text-teal-400 block mb-1">g++ -std=c++17 -Wall -Wextra -pedantic main.cpp -o main</code>
+            <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1 mt-2">
+              <li>• <code class="font-mono text-slate-800 dark:text-slate-200">-std=c++17</code>: Mengunci standar C++ 2017 agar seragam antarmesin.</li>
+              <li>• <code class="font-mono text-slate-800 dark:text-slate-200">-Wall -Wextra</code>: Nyalakan semua peringatan parameter nganggur, lupa return, dll.</li>
+              <li>• <code class="font-mono text-slate-800 dark:text-slate-200">-pedantic</code>: Menolak Variable Length Array (<code class="font-mono">arr[n]</code>) yang bukan standar baku.</li>
+            </ul>
+          </div>
+
+          <div class="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-300 dark:border-teal-800">
+            <h4 class="font-bold text-teal-800 dark:text-teal-300 text-sm mb-1">Allocation Balance — Pembuktian Utang Memori:</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+              Setiap <code class="font-mono text-teal-500 font-bold">new node_t</code> menaikkan counter alokasi. Setiap <code class="font-mono text-rose-500 font-bold">delete</code> menaikkan counter dealokasi. Di akhir program:
+            </p>
+            <div class="p-2.5 rounded-lg bg-slate-900 font-mono text-xs text-emerald-400">
+              ALLOCATION BALANCE: allocation = 101, deallocation = 101 [LULUS]
+            </div>
+          </div>
+        </div>
+
+        <!-- LeakSanitizer Output -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>LeakSanitizer Output (-fsanitize=address)</span>
+            <span class="text-rose-400 font-bold">BOCOR TERTANGKAP</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-rose-400 font-bold">==ERROR: LeakSanitizer: detected memory leaks</span>
+<span class="text-amber-300">Direct leak of 16 byte(s) in 1 object(s)</span>
+allocated from:
+    #1 0x4012ab in <span class="text-cyan-400">InsertFirst(list_t&, int)</span>
+    #2 0x401490 in <span class="text-emerald-400">main</span>
+
+<span class="text-slate-500">// 16 byte itu persis satu node_t!</span>
+<span class="text-slate-400">Buktikan programmu bebas kebocoran memori dengan</span>
+<span class="text-slate-400">tools resmi, bukan dengan perasaan atau mata telanjang!</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 5: ANATOMI MEMORI — STACK VS HEAP
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Dasar Teori 4.2.4 • Dua Struct
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Dua Struct Pembawa: <code class="font-mono text-teal-500">list_t</code> di Stack, <code class="font-mono text-cyan-500">node_t</code> di Heap
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Pertanyaan krusial: Di mana linked list tinggal di dalam memori komputer?
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Visual Architecture -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-teal-500/30 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-teal-600 dark:text-teal-400 text-base">1. Pengelola Rantai: struct list_t (16 Byte di Stack)</h4>
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-950 text-teal-700">STACK</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+              Variabel list lokal tinggal di Stack. Isinya cuma dua:
+            </p>
+            <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-xs text-slate-800 dark:text-slate-200 space-y-1">
+              <div>• <code class="text-teal-500 font-bold">node_t *head;</code> (8 byte alamat ke node pertama)</div>
+              <div>• <code class="text-cyan-500 font-bold">int nef;</code> (4 byte penghitung + 4 byte padding alignment = 8 byte)</div>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-cyan-500/30 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-cyan-600 dark:text-cyan-400 text-base">2. Gerbong Data: struct node_t (16 Byte di Heap)</h4>
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950 text-cyan-700">HEAP</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+              Setiap elemen data dialokasikan terpisah di Heap saat dibutuhkan via <code class="font-mono text-teal-400">new node_t</code>:
+            </p>
+            <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-xs text-slate-800 dark:text-slate-200 space-y-1">
+              <div>• <code class="text-emerald-500 font-bold">int info;</code> (4 byte muatan data asli)</div>
+              <div>• <code class="text-teal-500 font-bold">node_t *next;</code> (8 byte penunjuk ke node berikutnya / nullptr)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>definisi_linked_list.cpp</span>
+            <span class="text-teal-400">Modul 4 Standar</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-slate-500">// Gerbong elemen di HEAP</span>
+<span class="text-purple-400">struct</span> <span class="text-teal-400">node_t</span> {
+    <span class="text-emerald-400">int</span> info;      <span class="text-slate-500">// data (4 byte)</span>
+    node_t *next;  <span class="text-slate-500">// alamat node berikut (8 byte)</span>
+};
+
+<span class="text-slate-500">// Pengendali rantai di STACK</span>
+<span class="text-purple-400">struct</span> <span class="text-teal-400">list_t</span> {
+    node_t *head;  <span class="text-slate-500">// penunjuk ke kepala (8 byte)</span>
+    <span class="text-emerald-400">int</span> nef;       <span class="text-slate-500">// berapa node yang hidup (4 byte)</span>
+};
+
+<span class="text-slate-500">// Deklarasi di main():</span>
+list_t L;
+MakeEmpty(L); <span class="text-slate-500">// L.head = nullptr, L.nef = 0</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 6: OPERASI STATUS O(1)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Spesifikasi Operasi • 4.2.5.1
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Operasi Status Berbiaya 1 Langkah: O(1)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Empat operasi yang menanyakan atau menetapkan keadaan list tanpa perlu tahu isi satu pun node.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Code snippets -->
+        <div class="space-y-3 font-mono text-xs sm:text-sm">
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-teal-600 dark:text-teal-400 font-bold block mb-1">// 1. Inisialisasi / Kosongkan List</span>
+            <code class="text-slate-800 dark:text-slate-200 font-bold">void MakeEmpty(list_t &L) { L.head = nullptr; L.nef = 0; }</code>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-cyan-600 dark:text-cyan-400 font-bold block mb-1">// 2. Cek Apakah List Kosong</span>
+            <code class="text-slate-800 dark:text-slate-200 font-bold">bool IsEmpty(const list_t &L) { return L.head == nullptr; }</code>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-amber-600 dark:text-amber-400 font-bold block mb-1">// 3. Cek Apakah List Penuh (Selalu False!)</span>
+            <code class="text-slate-800 dark:text-slate-200 font-bold">bool IsFull(const list_t &L) { (void)L; return false; }</code>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-blue-600 dark:text-blue-400 font-bold block mb-1">// 4. Jumlah Elemen Aktif</span>
+            <code class="text-slate-800 dark:text-slate-200 font-bold">int LengthIs(const list_t &L) { return L.nef; }</code>
+          </div>
+        </div>
+
+        <!-- Explanations -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-teal-50 dark:bg-teal-950/40 border-2 border-teal-500/40 shadow-sm">
+            <h4 class="font-bold text-teal-800 dark:text-teal-300 text-base mb-1">Kenapa IsEmpty Dicek dari Head?</h4>
+            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              Meskipun NEF harus selalu sinkron, <b>head-lah yang memegang kebenaran mutlak</b>. Bila head bernilai <code class="font-mono text-teal-600">nullptr</code>, tidak ada satu pun node yang bisa dicapai! Memeriksa dari head membuat kesalahan lupa update NEF langsung terdeteksi.
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500/40 shadow-sm">
+            <h4 class="font-bold text-amber-800 dark:text-amber-300 text-base mb-1">Kenapa IsFull Selalu Mengembalikan False?</h4>
+            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              Karena linked list <b>tidak pernah penuh</b> selama RAM komputermu masih ada sisa memori! Fungsi ini tetap wajib ada di spesifikasi agar pemakai ADT tidak dipaksa tahu representasi apa yang dipakai di dalamnya. Baris <code class="font-mono">(void)L;</code> mencegah kompilator mengeluarkan warning parameter tidak dipakai.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 7: POLA PENELUSURAN (TRAVERSAL)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Pola Wajib • 4.2.5.2
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Pola Penelusuran (Traversal) (Traversal)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Pada linked list tidak ada rumus alamat acak. Satu-satunya cara mencapai node ke-i adalah berjalan kaki dari depan!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Code & Pattern -->
+        <div class="space-y-4">
+          <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+            <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+              <span>pola_penelusuran.cpp</span>
+              <span class="text-teal-400">Hafalkan 3 Baris Ini</span>
+            </div>
+<pre class="leading-relaxed"><code>node_t *p = L.head;         <span class="text-slate-500">// 1. Mulai dari kepala</span>
+<span class="text-purple-400">while</span> (p != <span class="text-purple-400">nullptr</span>) {       <span class="text-slate-500">// 2. Berhenti saat habis</span>
+    cout &lt;&lt; p-&gt;info &lt;&lt; <span class="text-amber-200">" "</span>;
+    p = p-&gt;next;            <span class="text-slate-500">// 3. Maju satu langkah</span>
+}</code></pre>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium">
+            💡 <b>Makna p->info:</b> Ikuti alamat yang disimpan <code class="font-mono text-teal-500">p</code>, lalu ambil anggota data <code class="font-mono text-teal-500">info</code> di alamat itu. Sama dengan <code class="font-mono">(*p).info</code>.
+          </div>
+        </div>
+
+        <!-- 2 Deadly Traps -->
+        <div class="space-y-3">
+          <div class="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-500/40 shadow-sm">
+            <h4 class="font-bold text-rose-600 dark:text-rose-400 text-sm mb-1 flex items-center gap-2">
+              <span>⚠️</span> Jebakan 1: while (p->next != nullptr)
+            </h4>
+            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              Perulangannya berhenti <b>satu langkah terlalu cepat</b>! Node terakhir tidak pernah diproses karena begitu tiba di node ujung, loop langsung bubar. Pada list [10, 20, 30], angka 30 tidak akan pernah tercetak.
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500/40 shadow-sm">
+            <h4 class="font-bold text-amber-700 dark:text-amber-300 text-sm mb-1 flex items-center gap-2">
+              <span>⚠️</span> Jebakan 2: Lupa Menulis p = p->next
+            </h4>
+            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              Pointer <code class="font-mono">p</code> akan diam di node pertama selamanya. Syarat <code class="font-mono">p != nullptr</code> selalu benar $	o$ <b>Infinite Loop</b>! Program menggantung tanpa pesan apa pun.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 8: RETRIEVEITEM & KEMATIAN BINARY SEARCH
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Operasi Pencarian • 4.2.5.3
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          RetrieveItem & Kenapa Binary Search Mati di Sini
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Mencari posisi indeks nilai <code class="font-mono text-teal-500">x</code>, atau mengembalikan <code class="font-mono text-rose-500">-1</code> jika tidak ditemukan.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Code Block -->
+        <div class="space-y-4">
+          <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+            <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+              <span>RetrieveItem.cpp</span>
+              <span class="text-teal-400">Early Return</span>
+            </div>
+<pre class="leading-relaxed"><code><span class="text-emerald-400">int</span> <span class="text-blue-400">RetrieveItem</span>(<span class="text-purple-400">const</span> list_t &L, <span class="text-emerald-400">int</span> x) {
+    <span class="text-emerald-400">int</span> i = <span class="text-amber-300">0</span>;
+    <span class="text-purple-400">for</span> (node_t *p = L.head; p != <span class="text-purple-400">nullptr</span>; p = p-&gt;next) {
+        <span class="text-purple-400">if</span> (p-&gt;info == x) <span class="text-purple-400">return</span> i; <span class="text-slate-500">// Ketemu! Langsung pulang</span>
+        i++;
+    }
+    <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>; <span class="text-slate-500">// Menelusuri sampai habis dan tidak ada</span>
+}</code></pre>
+          </div>
+
+          <div class="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-300 dark:border-teal-800 text-xs sm:text-sm text-teal-900 dark:text-teal-200 font-medium">
+            <b>Biaya Terukur:</b> Jika data ada di indeks $i$, biayanya $i+1$ pembandingan. Jika data tidak ada, biayanya sebanyak $NEF$ pembandingan.
+          </div>
+        </div>
+
+        <!-- Binary Search explanation -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-rose-500/30 shadow-md space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 flex items-center justify-center font-black text-lg">
+            ☠️
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Kenapa Binary Search Tidak Efisien di Linked List?</h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Pada array yang terurut, Binary Search bisa melompat langsung ke indeks tengah dalam 1 detik ($O(1)$) berkat rumus alamat.
+          </p>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Pada linked list, untuk sekadar <b>mencapai elemen tengahnya saja kamu harus jalan kaki $N/2$ langkah</b> dari depan! Keuntungan bagi-dua langsung musnah karena ongkos perjalanannya sendiri sudah $O(N)$.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 9: OPERASI MAHKOTA: INSERTFIRST
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950 border border-teal-300 dark:border-teal-800">
+          Operasi Mahkota • 4.2.5.4
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          InsertFirst: Operasi Termurah & Keunggulan Mutlak
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Menyisipkan elemen di posisi paling depan dalam <b>0 langkah pergeseran</b>, berapa pun panjang listnya!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- 3 Step Logic -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h4 class="font-bold text-teal-600 dark:text-teal-400 text-base">Aturan Emas Penyisipan:</h4>
+            <div class="text-xs sm:text-sm space-y-2 text-slate-700 dark:text-slate-300">
+              <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800"><b>1. Minta Memori:</b> <code class="font-mono text-teal-400">node_t *baru = new node_t;</code></div>
+              <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800"><b>2. Isi Data:</b> <code class="font-mono text-teal-400">baru->info = x;</code></div>
+              <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-400">
+                <b class="text-emerald-600 dark:text-emerald-400">3a. SAMBUNG DULU:</b> <code class="font-mono">baru->next = L.head;</code>
+                <div class="text-[11px] text-slate-500 mt-0.5">Pegang tangan yang baru sebelum lepas yang lama!</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-400">
+                <b class="text-cyan-600 dark:text-cyan-400">3b. PINDAHKAN HEAD:</b> <code class="font-mono">L.head = baru; L.nef++;</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-300 text-xs sm:text-sm text-teal-900 dark:text-teal-200 font-medium">
+            ⚡ <b>Biaya Terukur:</b> 0 node dilewati. Bandingkan dengan array yang harus menggeser jutaan elemen ke kanan!
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>InsertFirst.cpp</span>
+            <span class="text-emerald-400 font-bold">Biaya: 0 Node</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-emerald-400">int</span> <span class="text-blue-400">InsertFirst</span>(list_t &L, <span class="text-emerald-400">int</span> x) {
+    node_t *baru = <span class="text-purple-400">new</span> node_t;
+    baru-&gt;info = x;
+
+    <span class="text-slate-500">// SAMBUNG dulu ke kepala lama</span>
+    baru-&gt;next = L.head;
+
+    <span class="text-slate-500">// Baru alihkan kepala ke node baru</span>
+    L.head = baru;
+    L.nef++;
+
+    <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 10: SISIP POSISI TERTENTU: INSERTAT
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Operasi Penyisipan • 4.2.5.6
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          InsertAt: Berhenti di <code class="font-mono text-teal-500">pos - 1</code> & Sambung Dulu!
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Menyisipkan elemen sehingga ia menempati indeks <code class="font-mono text-teal-500">pos</code>.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Logic Explanation -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">Kenapa Berhenti di <code class="font-mono text-teal-500">pos - 1</code>?</h4>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Karena yang akan disambungkan adalah anggota <code class="font-mono text-teal-500">next</code> milik <b>pendahulunya</b>. Kalau kamu berjalan sampai ke <code class="font-mono">pos</code>, kamu sudah terlambat dan tidak bisa mundur lagi (karena ini *singly* linked list)!
+            </p>
+            <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 text-xs text-rose-900 dark:text-rose-200 font-bold">
+              Posisi 0 tidak punya pendahulu! Langsung delegasikan: <code class="font-mono">if (pos == 0) return InsertFirst(L, x);</code>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-xs sm:text-sm text-amber-900 dark:text-amber-200 font-medium">
+            🚨 <b>Bencana Terbalik:</b> Jika kamu putus dulu (<code class="font-mono">p->next = baru</code>) sebelum menyambung (<code class="font-mono">baru->next = p->next</code>), maka sisa list di kanan akan terputus dan hilang ke angkasa RAM selamanya (Memory Leak)!
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>InsertAt.cpp</span>
+            <span class="text-teal-400">Sambung Dulu Baru Putus</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-emerald-400">int</span> <span class="text-blue-400">InsertAt</span>(list_t &L, <span class="text-emerald-400">int</span> pos, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (pos &lt; <span class="text-amber-300">0</span> || pos &gt; L.nef) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    <span class="text-purple-400">if</span> (pos == <span class="text-amber-300">0</span>) <span class="text-purple-400">return</span> InsertFirst(L, x);
+
+    node_t *p = L.head;
+    <span class="text-purple-400">for</span> (<span class="text-emerald-400">int</span> i = <span class="text-amber-300">0</span>; i &lt; pos - <span class="text-amber-300">1</span>; i++)
+        p = p-&gt;next; <span class="text-slate-500">// Berhenti di pos - 1</span>
+
+    node_t *baru = <span class="text-purple-400">new</span> node_t;
+    baru-&gt;info = x;
+
+    <span class="text-slate-500">// 1. SAMBUNG dulu</span>
+    baru-&gt;next = p-&gt;next;
+
+    <span class="text-slate-500">// 2. Baru PUTUS</span>
+    p-&gt;next = baru;
+    L.nef++;
+    <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 11: SISIP DI AKHIR: INSERTITEM
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Operasi Penyisipan • 4.2.5.5
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          InsertItem: Menyisipkan di Akhir Rantai
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Terdengar mirip InsertFirst, tetapi ternyata jauh lebih mahal! Kenapa?
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Explanation -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">Alamat Kepala Dipegang, Alamat Ekor Tidak!</h4>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              <code class="font-mono text-teal-500">list_t</code> hanya menyimpan pointer <code class="font-mono">head</code>. Alamat node paling akhir tidak dipegang siapa pun! Maka kita harus <b>jalan kaki menelusuri dari kepala sampai ketemu node yang next-nya bernilai nullptr</b>.
+            </p>
+            <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300">
+              Syarat loop: <code class="text-teal-500 font-bold">while (p->next != nullptr)</code><br>
+              Berhenti tepat <b>DI</b> node terakhir, bukan melewatinya!
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-xs sm:text-sm text-amber-900 dark:text-amber-200 font-medium">
+            ⚠️ <b>Kasus Khusus List Kosong:</b> Bila list kosong (<code class="font-mono">head == nullptr</code>), tidak ada node yang bisa disambungi. Node baru itu sendiri langsung menjadi kepala: <code class="font-mono">L.head = baru;</code>!
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>InsertItem.cpp</span>
+            <span class="text-amber-400 font-bold">Biaya: NEF - 1 Node</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-emerald-400">int</span> <span class="text-blue-400">InsertItem</span>(list_t &L, <span class="text-emerald-400">int</span> x) {
+    node_t *baru = <span class="text-purple-400">new</span> node_t;
+    baru-&gt;info = x;
+    baru-&gt;next = <span class="text-purple-400">nullptr</span>; <span class="text-slate-500">// Menjadi yang terakhir</span>
+
+    <span class="text-purple-400">if</span> (L.head == <span class="text-purple-400">nullptr</span>) {
+        L.head = baru;
+        L.nef++;
+        <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+    }
+
+    node_t *p = L.head;
+    <span class="text-purple-400">while</span> (p-&gt;next != <span class="text-purple-400">nullptr</span>) <span class="text-slate-500">// Berhenti DI node terakhir</span>
+        p = p-&gt;next;
+
+    p-&gt;next = baru;
+    L.nef++;
+    <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 12: PENGHAPUSAN: DELETEFIRST & DELETEAT
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Operasi Penghapusan • 4.2.5.7
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          DeleteFirst & DeleteAt: Simpan Dulu, Sambung Pintas, Baru Delete!
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Dua tugas mutlak: Melepaskan node dari rantai DAN mengembalikan memorinya ke sistem operasi.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- DeleteFirst -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">DeleteFirst (Hapus Kepala)</h4>
+            <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-600 text-xs font-mono font-bold">Biaya: 0 Node</span>
+          </div>
+          <div class="bg-slate-900 rounded-xl p-3 font-mono text-xs text-slate-200">
+<pre><code><span class="text-emerald-400">int</span> <span class="text-blue-400">DeleteFirst</span>(list_t &L) {
+    <span class="text-purple-400">if</span> (L.head == <span class="text-purple-400">nullptr</span>) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    node_t *hapus = L.head;  <span class="text-slate-500">// 1. SIMPAN dulu alamatnya</span>
+    L.head = hapus-&gt;next;    <span class="text-slate-500">// 2. Alihkan kepala</span>
+    <span class="text-purple-400">delete</span> hapus;            <span class="text-slate-500">// 3. Baru hapus!</span>
+    L.nef--;
+    <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- DeleteAt -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">DeleteAt (Hapus Indeks Pos)</h4>
+            <span class="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-600 text-xs font-mono font-bold">Biaya: pos - 1 Node</span>
+          </div>
+          <div class="bg-slate-900 rounded-xl p-3 font-mono text-xs text-slate-200">
+<pre><code><span class="text-emerald-400">int</span> <span class="text-blue-400">DeleteAt</span>(list_t &L, <span class="text-emerald-400">int</span> pos) {
+    <span class="text-purple-400">if</span> (L.head == <span class="text-purple-400">nullptr</span> || pos &lt; <span class="text-amber-300">0</span> || pos &gt;= L.nef) <span class="text-purple-400">return</span> -<span class="text-amber-300">1</span>;
+    <span class="text-purple-400">if</span> (pos == <span class="text-amber-300">0</span>) <span class="text-purple-400">return</span> DeleteFirst(L);
+
+    node_t *p = L.head;
+    <span class="text-purple-400">for</span> (<span class="text-emerald-400">int</span> i = <span class="text-amber-300">0</span>; i &lt; pos - <span class="text-amber-300">1</span>; i++) p = p-&gt;next;
+
+    node_t *hapus = p-&gt;next; <span class="text-slate-500">// 1. SIMPAN dulu</span>
+    p-&gt;next = hapus-&gt;next;   <span class="text-slate-500">// 2. Sambung pintas melompat</span>
+    <span class="text-purple-400">delete</span> hapus;            <span class="text-slate-500">// 3. Bebaskan memori</span>
+    L.nef--;
+    <span class="text-purple-400">return</span> <span class="text-amber-300">0</span>;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 text-xs sm:text-sm text-rose-900 dark:text-rose-200 font-medium">
+        ☠️ <b>Kenapa Wajib Simpan Dulu?</b> Karena begitu pointer pendahulu dialihkan melompat (<code class="font-mono">p->next = hapus->next</code>), tidak ada variabel yang memegang alamat node itu lagi! Kalau belum disimpan, node itu akan menjadi sampah abadi di RAM (Memory Leak).
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 13: PEMBERSIHAN TOTAL: DEALLOCATE
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950 border border-teal-300 dark:border-teal-800">
+          Penyelesaian Utang Memori • 4.2.5.8
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          Deallocate: Membebaskan Seluruh Node Satu per Satu
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Setiap <code class="font-mono text-teal-500">new</code> adalah utang. Pelunasannya adalah menghapus seluruh node sebelum program selesai!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Logic Explanation -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">Tidak Ada Jalan Pintas!</h4>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Pada array heap, satu baris <code class="font-mono">delete[] a;</code> langsung membersihkan 1.000 elemen sekaligus. Pada linked list, <b>1.000 node harus di-delete sebanyak 1.000 kali satu per satu</b>!
+            </p>
+            <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 text-xs text-rose-900 dark:text-rose-200">
+              <b>Kesalahan Fatal:</b> Menulis <code class="font-mono">delete p;</code> lalu <code class="font-mono">p = p->next;</code>. Itu membaca memori yang baru saja dibunuh! Kompilator menyebutnya: <b>heap-use-after-free</b>!
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-300 text-xs sm:text-sm text-teal-900 dark:text-teal-200 font-medium">
+            🛡️ <b>Pola Benar:</b> Selalu simpan penerusnya sebelum mengeksekusi delete: <code class="font-mono">node_t *berikut = p->next; delete p; p = berikut;</code>.
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>Deallocate.cpp</span>
+            <span class="text-emerald-400 font-bold">Biaya: NEF kali delete</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-purple-400">void</span> <span class="text-blue-400">Deallocate</span>(list_t &L) {
+    node_t *p = L.head;
+    <span class="text-purple-400">while</span> (p != <span class="text-purple-400">nullptr</span>) {
+        node_t *berikut = p-&gt;next; <span class="text-slate-500">// 1. SIMPAN dulu selagi bisa</span>
+        <span class="text-purple-400">delete</span> p;                  <span class="text-slate-500">// 2. Kembalikan memori</span>
+        p = berikut;               <span class="text-slate-500">// 3. Maju ke penerus</span>
+    }
+    L.head = <span class="text-purple-400">nullptr</span>;              <span class="text-slate-500">// Dinolkan kembali</span>
+    L.nef = <span class="text-amber-300">0</span>;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 14: SIMULATOR INTERAKTIF NODE VISUALIZER
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-1">
+      <div class="mb-3">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950 border border-teal-300 dark:border-teal-800">
+          Laboratorium Interaktif • Visualizer Pointer
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
+          Simulator Singly Linked List: Rantai Node & Allocation Balance
+        </h2>
+      </div>
+
+      <!-- Controls & Node Chain Display -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-3">
+        <!-- Controls Left -->
+        <div class="lg:col-span-4 space-y-2.5">
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5">
+            <div class="text-xs font-bold text-slate-500 uppercase">Input Node</div>
+            <div class="grid grid-cols-2 gap-2">
+              <input type="number" id="simVal" value="25" placeholder="Nilai x" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs">
+              <input type="number" id="simPos" value="1" min="0" placeholder="Indeks pos" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="uiInsertFirst()" class="py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition">
+                InsertFirst(x)
+              </button>
+              <button onclick="uiInsertItem()" class="py-2 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs transition">
+                InsertItem(x)
+              </button>
+              <button onclick="uiInsertAt()" class="py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition">
+                InsertAt(pos, x)
+              </button>
+              <button onclick="uiDeleteAt()" class="py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition">
+                DeleteAt(pos)
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button onclick="uiDeallocate()" class="py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-300 font-bold text-xs transition">
+                Deallocate()
+              </button>
+              <button onclick="uiSampleList()" class="py-1.5 px-3 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 font-bold text-xs transition">
+                Reset Sample [10, 20, 30]
+              </button>
+            </div>
+          </div>
+
+          <!-- Allocation Balance Card -->
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono space-y-1 text-slate-200">
+            <div class="text-teal-400 font-bold flex justify-between">
+              <span>ALLOCATION BALANCE:</span>
+              <span id="balStatus" class="text-emerald-400 font-bold">[SEIMBANG]</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Alokasi (new node_t): <b id="cntAlloc" class="text-teal-300">3</b></span>
+              <span>Dealokasi (delete): <b id="cntDealloc" class="text-rose-400">0</b></span>
+            </div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-800">
+              Node Aktif (NEF): <b id="cntNef" class="text-white">3</b> | Hop Terakhir: <b id="cntHop" class="text-amber-400">0 node</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Node Chain Right -->
+        <div class="lg:col-span-8 flex flex-col justify-between">
+          <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl space-y-3 min-h-[220px]">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+              <span>RANTAI POINTER DI HEAP:</span>
+              <span class="text-teal-400">head &rarr; [node_0] &rarr; [node_1] &rarr; nullptr</span>
+            </div>
+
+            <!-- Dynamic Node Chain Container -->
+            <div id="chainVisualContainer" class="flex flex-wrap items-center gap-3 py-4 overflow-x-auto">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Action Log -->
+            <div id="simLogBox" class="p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-teal-400 min-h-[46px] flex items-center">
+              List awal berisi [10, 20, 30]. Silakan uji operasi penyisipan atau penghapusan.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 15: NERACA ONGKOS: WAKTU VS MEMORI
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">
+          Analisis Rekayasa • 4.2.6
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Neraca Ongkos: Waktu vs Memori (Siapa yang Menang?)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Perbandingan nyata menyimpan 8 bilangan integer (<code class="font-mono">int</code> = 4 byte):
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Table Left -->
+        <div class="lg:col-span-7 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-400">
+                <th class="pb-2">Operasi</th>
+                <th class="pb-2">Array Statis</th>
+                <th class="pb-2 text-teal-500">Linked List</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+              <tr>
+                <td class="py-2.5 font-bold">Baca elemen ke-i</td>
+                <td class="py-2.5 text-emerald-500 font-bold">1 langkah O(1)</td>
+                <td class="py-2.5 text-rose-500 font-bold">i node dilewati O(N)</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-bold">Sisip di indeks 0</td>
+                <td class="py-2.5 text-rose-500 font-bold">NEF geser O(N)</td>
+                <td class="py-2.5 text-emerald-500 font-bold">0 node dilewati O(1)!</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-bold">Hapus di indeks 0</td>
+                <td class="py-2.5 text-rose-500 font-bold">NEF - 1 geser</td>
+                <td class="py-2.5 text-emerald-500 font-bold">0 node dilewati O(1)!</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-bold">Sisip di indeks i</td>
+                <td class="py-2.5 text-amber-500">NEF - i geser</td>
+                <td class="py-2.5 text-amber-500">i - 1 dilewati</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-bold">Kapasitas habis</td>
+                <td class="py-2.5 text-rose-500">Ditolak (-1)</td>
+                <td class="py-2.5 text-emerald-500 font-bold">Tidak pernah habis!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Memory Overhead Right -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">Harga Memori untuk 8 Bilangan:</h4>
+            <div class="space-y-2 text-xs font-mono">
+              <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 flex justify-between">
+                <span>Array Statis (Stack):</span>
+                <b class="text-emerald-500">36 Byte</b>
+              </div>
+              <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 flex justify-between">
+                <span>Array Dinamis Heap:</span>
+                <b class="text-teal-500">48 Byte</b>
+              </div>
+              <div class="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-300 flex justify-between text-amber-900 dark:text-amber-200">
+                <span>Linked List:</span>
+                <b class="text-rose-500">144 Byte (4x lipat!)</b>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+              Satu <code class="font-mono">node_t</code> memakan 16 byte padahal datanya cuma 4 byte: 8 byte untuk pointer dan 4 byte terbuang untuk penyelarasan (*padding alignment*).
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-300 text-xs text-teal-900 dark:text-teal-200 font-medium">
+            💡 <b>Hukum Emas Praktikum:</b> Semakin kecil ukuran tipe elemennya, semakin mahal linked list! Tapi untuk struct besar (puluhan byte), overhead 8-byte pointer hampir tidak terasa.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 16: 6 DOSA BESAR MAHASISWA & KASUS UJI BATAS
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800">
+          Checklist Evaluasi • 4.2.7
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          6 Kesalahan Umum Praktikum & Checklist Kasus Uji Batas
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Daftar kesalahan yang dikumpulkan dari pekerjaan mahasiswa tahun-tahun sebelumnya:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-4">
+        <!-- 6 Mistakes -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+          <h4 class="font-bold text-rose-600 dark:text-rose-400 text-base mb-1">6 Kesalahan yang Sering Terjadi:</h4>
+          <div class="text-xs text-slate-600 dark:text-slate-300 space-y-1.5">
+            <div><b>1. Baca p->info saat p bernilai nullptr:</b> Crash seketika (Segmentation Fault)!</div>
+            <div><b>2. Urutan sambung dan putus terbalik:</b> Rantai putus, list rusak atau bocor.</div>
+            <div><b>3. Lupa delete:</b> Ditangkap oleh LeakSanitizer (Direct leak detected).</div>
+            <div><b>4. Baca p->next sesudah p dihapus:</b> Heap-use-after-free!</div>
+            <div><b>5. Lupa memperbarui NEF:</b> Listnya benar tapi LengthIs berbohong dan loop salah.</div>
+            <div><b>6. Curang memakai std::list:</b> Melewatkan seluruh esensi pembelajaran wadah.</div>
+          </div>
+        </div>
+
+        <!-- Boundary Test Cases -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+          <h4 class="font-bold text-teal-600 dark:text-teal-400 text-base mb-1">Checklist Kasus Uji Batas Wajib:</h4>
+          <div class="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 font-mono">
+            <div class="flex items-center gap-2"><span class="text-teal-500 font-bold">✔</span> List Kosong (0 node): DeleteFirst return -1, Deallocate aman.</div>
+            <div class="flex items-center gap-2"><span class="text-teal-500 font-bold">✔</span> List 1 Node: Hapus node pertama membuat list jadi kosong sempurna.</div>
+            <div class="flex items-center gap-2"><span class="text-teal-500 font-bold">✔</span> Sisip di indeks 0: Harus mendelegasikan ke InsertFirst.</div>
+            <div class="flex items-center gap-2"><span class="text-teal-500 font-bold">✔</span> Sisip di indeks NEF: Harus sama dengan InsertItem.</div>
+            <div class="flex items-center gap-2"><span class="text-teal-500 font-bold">✔</span> Hapus di indeks NEF - 1: Node terakhir terhapus, pendahulunya nullptr.</div>
+            <div class="flex items-center gap-2"><span class="text-teal-500 font-bold">✔</span> Allocation Balance: Total new sama persis dengan total delete!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sacred Command -->
+      <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span class="text-teal-400 font-bold">Flag Uji Kebocoran Mandiri:</span>
+        <code class="text-amber-300">g++ -std=c++17 -fsanitize=address -Wall main.cpp -o main && ./main</code>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM CONTROL BAR -->
+  <footer class="h-16 border-t border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-6 flex items-center justify-between z-30 shrink-0 select-none">
+    <div class="flex items-center space-x-2">
+      <button onclick="prevSlide()" class="px-4 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+        <span>Sebelumnya</span>
+      </button>
+
+      <button onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-teal-500/20 transition flex items-center gap-2">
+        <span>Selanjutnya</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+
+    <!-- Quick Slide Indicator Dots -->
+    <div id="slideDotsContainer" class="hidden md:flex items-center space-x-1.5">
+      <!-- Rendered via JS -->
+    </div>
+
+    <div class="text-xs text-slate-400 font-mono hidden sm:block">
+      Navigasi: <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">→</kbd> | Menu: <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">M</kbd>
+    </div>
+  </footer>
+
+  <!-- SLIDE MENU MODAL -->
+  <div id="slideMenuModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <h3 class="font-extrabold text-slate-900 dark:text-white text-base">
+          Daftar Slide Presentasi Modul 4 (2026)
+        </h3>
+        <button onclick="toggleSlideMenu()" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div id="slideMenuList" class="p-4 overflow-y-auto space-y-1">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    const totalSlides = 16;
+    let currentSlide = 0;
+
+    const slideTitles = [
+      "Cover: Modul 4 Singly Linked List (2026)",
+      "The Why: Mengapa Tinggalkan Array? (Masalah O(N))",
+      "Evolusi 4 Wadah Data: Statis, Heap, Vector, Linked List",
+      "Senjata Lab: g++ Compiler & Allocation Balance",
+      "Anatomi Memori: list_t di Stack vs node_t di Heap",
+      "Spesifikasi Dale: Operasi Status O(1) & IsFull",
+      "Pola Penelusuran (Traversal) (Traversal) & 2 Jebakan",
+      "RetrieveItem & Mengapa Binary Search Tidak Efisien di Linked List",
+      "Operasi Utama: InsertFirst O(1) Tanpa Geser",
+      "InsertAt: Berhenti di pos - 1 & Sambung Dulu",
+      "InsertItem: Menyisipkan di Akhir Rantai",
+      "Penghapusan: DeleteFirst & DeleteAt",
+      "Pembersihan Total: Deallocate & Anti Use-After-Free",
+      "Laboratorium Interaktif: Rantai Node & Allocation Balance",
+      "Neraca Ongkos: Waktu vs Memori (Siapa Menang?)",
+      "6 Kesalahan Umum Praktikum & Checklist Kasus Uji Batas"
+    ];
+
+    function updateSlide() {
+      const slides = document.querySelectorAll('.slide');
+      slides.forEach((s, idx) => {
+        if (idx === currentSlide) {
+          s.classList.remove('hidden');
+          s.classList.add('slide-enter');
+        } else {
+          s.classList.add('hidden');
+          s.classList.remove('slide-enter');
+        }
+      });
+
+      document.getElementById('currentSlideNum').textContent = currentSlide + 1;
+      document.getElementById('totalSlideNum').textContent = totalSlides;
+
+      const progress = ((currentSlide + 1) / totalSlides) * 100;
+      document.getElementById('progressBar').style.width = `${progress}%`;
+
+      renderDots();
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(idx) {
+      if (idx >= 0 && idx < totalSlides) {
+        currentSlide = idx;
+        updateSlide();
+        document.getElementById('slideMenuModal').classList.add('hidden');
+      }
+    }
+
+    function renderDots() {
+      const container = document.getElementById('slideDotsContainer');
+      container.innerHTML = Array.from({ length: totalSlides }).map((_, i) => `
+        <button onclick="goToSlide(${i})" title="${slideTitles[i]}" class="h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-6 bg-teal-500' : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'}"></button>
+      `).join('');
+    }
+
+    function toggleSlideMenu() {
+      const modal = document.getElementById('slideMenuModal');
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        const listEl = document.getElementById('slideMenuList');
+        listEl.innerHTML = slideTitles.map((t, i) => `
+          <div onclick="goToSlide(${i})" class="py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition ${i === currentSlide ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 font-bold' : 'text-slate-700 dark:text-slate-300'}">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs font-mono">${i + 1}</span>
+              <span class="text-xs sm:text-sm">${t}</span>
+            </div>
+            ${i === currentSlide ? '<span class="text-[10px] px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300">Aktif</span>' : ''}
+          </div>
+        `).join('');
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault(); nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') {
+        e.preventDefault(); prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault(); goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault(); goToSlide(totalSlides - 1);
+      } else if (e.key === 'm' || e.key === 'M') {
+        toggleSlideMenu();
+      } else if (e.key === 't' || e.key === 'T') {
+        toggleTheme();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
+    });
+
+    // ==========================================
+    // SIMULATOR INTERAKTIF LINKED LIST LOGIC
+    // ==========================================
+    let simNodes = [10, 20, 30]; // array representation of linked list
+    let totalAlloc = 3;
+    let totalDealloc = 0;
+    let lastHop = 0;
+
+    function renderChain() {
+      document.getElementById('cntAlloc').textContent = totalAlloc;
+      document.getElementById('cntDealloc').textContent = totalDealloc;
+      document.getElementById('cntNef').textContent = simNodes.length;
+      document.getElementById('cntHop').textContent = `${lastHop} node`;
+
+      const balStatus = document.getElementById('balStatus');
+      if (totalAlloc === totalDealloc + simNodes.length) {
+        balStatus.className = "text-emerald-400 font-bold";
+        balStatus.textContent = "[SEIMBANG]";
+      } else {
+        balStatus.className = "text-rose-500 font-bold animate-pulse";
+        balStatus.textContent = "[BOCOR / LEAK!]";
+      }
+
+      const container = document.getElementById('chainVisualContainer');
+      if (simNodes.length === 0) {
+        container.innerHTML = `
+          <div class="flex items-center gap-2 font-mono text-sm">
+            <span class="px-3 py-1.5 rounded-xl bg-teal-950 border border-teal-500/50 text-teal-300 font-bold">head</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="px-3 py-1.5 rounded-xl bg-slate-800 text-rose-400 border border-rose-500/40 font-bold">nullptr (Kosong)</span>
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <div class="flex items-center gap-1 font-mono text-xs">
+          <span class="px-2.5 py-1 rounded-lg bg-teal-950 border border-teal-500/50 text-teal-300 font-bold">head</span>
+          <span class="text-slate-400">&rarr;</span>
+        </div>
+      `;
+
+      simNodes.forEach((val, idx) => {
+        html += `
+          <div class="node-card flex items-center rounded-xl bg-slate-800/90 border-2 border-teal-500/60 p-2 shadow-lg text-center font-mono">
+            <div class="px-2.5 py-1 border-r border-slate-700">
+              <div class="text-[9px] text-teal-400">info [${idx}]</div>
+              <div class="text-sm font-black text-white">${val}</div>
+            </div>
+            <div class="px-2 py-1 text-slate-400 text-[10px]">
+              <div class="text-[9px] text-slate-500">next</div>
+              <div>&bull;&rarr;</div>
+            </div>
+          </div>
+          <div class="text-teal-400 font-bold">&rarr;</div>
+        `;
+      });
+
+      html += `
+        <span class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-500 font-mono text-xs font-bold">nullptr</span>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function uiInsertFirst() {
+      const val = parseInt(document.getElementById('simVal').value) || 99;
+      simNodes.unshift(val);
+      totalAlloc++;
+      lastHop = 0;
+      document.getElementById('simLogBox').innerHTML = `<b>✔ InsertFirst(${val}) Selesai:</b> Node baru dialokasikan di Heap dan disambungkan ke kepala. Biaya = <b>0 node dilewati</b> (O(1)).`;
+      renderChain();
+    }
+
+    function uiInsertItem() {
+      const val = parseInt(document.getElementById('simVal').value) || 99;
+      lastHop = simNodes.length === 0 ? 0 : simNodes.length - 1;
+      simNodes.push(val);
+      totalAlloc++;
+      document.getElementById('simLogBox').innerHTML = `<b>✔ InsertItem(${val}) Selesai:</b> Berjalan kaki menelusuri ${lastHop} node sampai ujung (p->next == nullptr), lalu menyambung node baru.`;
+      renderChain();
+    }
+
+    function uiInsertAt() {
+      const val = parseInt(document.getElementById('simVal').value) || 99;
+      const pos = parseInt(document.getElementById('simPos').value) || 0;
+
+      if (pos < 0 || pos > simNodes.length) {
+        document.getElementById('simLogBox').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> Indeks pos ${pos} tidak sah (harus 0 s/d ${simNodes.length})!`;
+        return;
+      }
+
+      if (pos === 0) {
+        uiInsertFirst();
+        return;
+      }
+
+      lastHop = pos - 1;
+      simNodes.splice(pos, 0, val);
+      totalAlloc++;
+      document.getElementById('simLogBox').innerHTML = `<b>✔ InsertAt(${pos}, ${val}) Selesai:</b> Berhenti di indeks ${pos-1} (${lastHop} node dilewati). Sambung dulu baru putus!`;
+      renderChain();
+    }
+
+    function uiDeleteAt() {
+      const pos = parseInt(document.getElementById('simPos').value) || 0;
+      if (simNodes.length === 0) {
+        document.getElementById('simLogBox').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> List kosong (head == nullptr)!`;
+        return;
+      }
+      if (pos < 0 || pos >= simNodes.length) {
+        document.getElementById('simLogBox').innerHTML = `<span class="text-rose-400 font-bold">❌ DITOLAK (-1):</span> Indeks ${pos} tidak sah!`;
+        return;
+      }
+
+      const val = simNodes[pos];
+      lastHop = pos === 0 ? 0 : pos - 1;
+      simNodes.splice(pos, 1);
+      totalDealloc++;
+      document.getElementById('simLogBox').innerHTML = `<b>✔ DeleteAt(${pos}) Selesai:</b> Node bernilai ${val} disimpan, disambung pintas, lalu di-delete! Biaya = ${lastHop} node dilewati.`;
+      renderChain();
+    }
+
+    function uiDeallocate() {
+      const count = simNodes.length;
+      if (count === 0) {
+        document.getElementById('simLogBox').innerHTML = `List sudah kosong. Tidak ada node yang perlu di-delete.`;
+        return;
+      }
+      totalDealloc += count;
+      simNodes = [];
+      lastHop = count;
+      document.getElementById('simLogBox').innerHTML = `<b>✔ Deallocate() Selesai:</b> Membebaskan seluruh ${count} node satu per satu dari heap. head dinolkan kembali!`;
+      renderChain();
+    }
+
+    function uiSampleList() {
+      simNodes = [10, 20, 30];
+      totalAlloc = 3;
+      totalDealloc = 0;
+      lastHop = 0;
+      document.getElementById('simLogBox').innerHTML = `List di-reset dengan sample awal [10, 20, 30].`;
+      renderChain();
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.remove('dark');
+      }
+      updateSlide();
+      renderChain();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modul 5 (2026): Varian Linked List | Praktikum ASD</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              700: '#7e22ce',
+              800: '#6b21a8',
+              900: '#581c87',
+            },
+            code: {
+              bg: '#0a0d18',
+              border: '#1e293b'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['Fira Code', 'JetBrains Mono', 'Consolas', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+    }
+    code, pre, .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .dark ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.7);
+    }
+    .slide-enter {
+      animation: fadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.995); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .node-d-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .node-d-card:hover {
+      transform: translateY(-4px);
+    }
+
+    @keyframes floatDown {
+      0% { opacity: 0; transform: translateY(-28px) scale(0.85); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.4); border-color: rgba(234, 179, 8, 0.9); }
+      50% { box-shadow: 0 0 25px rgba(234, 179, 8, 0.8); border-color: rgba(250, 204, 21, 1); }
+    }
+    @keyframes disintegrateNode {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1) translateY(-10px); filter: blur(2px); }
+      100% { opacity: 0; transform: scale(0.2) translateY(20px); filter: blur(8px); }
+    }
+    @keyframes dashMove {
+      to { stroke-dashoffset: -20; }
+    }
+    @keyframes cutShake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-8deg); }
+      75% { transform: rotate(8deg); }
+    }
+    .anim-float-node {
+      animation: floatDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .anim-pulse-glow {
+      animation: pulseGlow 1.2s infinite ease-in-out;
+    }
+    .anim-disintegrate {
+      animation: disintegrateNode 0.5s ease-out forwards;
+    }
+    .anim-cut-shake {
+      animation: cutShake 0.4s infinite ease-in-out;
+    }
+
+
+    /* SVG Canvas Styles */
+    .wire-cable {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      transition: stroke 0.3s;
+    }
+    .wire-cable.normal {
+      stroke: #a855f7;
+    }
+    .wire-cable.new-link {
+      stroke: #22d3ee;
+      filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.8));
+    }
+    .wire-cable.bypass {
+      stroke: #10b981;
+      stroke-dasharray: 6 3;
+      filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.8));
+    }
+    .wire-cable.snapping {
+      stroke: #f43f5e;
+      stroke-dasharray: 4 2;
+      animation: dashMove 0.4s linear infinite;
+    }
+    .node-svg-box {
+      cursor: pointer;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+    }
+    .node-svg-box:hover rect.body {
+      stroke: #c084fc;
+      stroke-width: 2.5;
+    }
+    @keyframes dashMove {
+      to { stroke-dashoffset: -12; }
+    }
+
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 h-screen w-screen overflow-hidden flex flex-col justify-between transition-colors duration-300">
+
+  <!-- TOP HEADER / CONTROL BAR -->
+  <header class="h-16 border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-6 flex items-center justify-between z-30 shrink-0 select-none">
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-500 text-white flex items-center justify-center font-black text-base shadow-lg shadow-purple-500/25">
+        M5
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <span>Modul 5: Varian Linked List</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 border border-purple-300 dark:border-purple-800 text-purple-800 dark:text-purple-300 font-bold">Edisi 2026</span>
+        </h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Doubly & Circular Linked List • Invarian & C++ Prosedural</p>
+      </div>
+    </div>
+
+    <!-- Center Slide Counter / Progress -->
+    <div class="flex items-center space-x-4">
+      <div class="text-xs sm:text-sm font-bold px-3.5 py-1.5 rounded-full bg-slate-200/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300/60 dark:border-slate-700">
+        Slide <span id="currentSlideNum" class="text-purple-600 dark:text-purple-400 font-extrabold">1</span> / <span id="totalSlideNum">16</span>
+      </div>
+      <div class="w-32 sm:w-56 h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 transition-all duration-300 ease-out" style="width: 6.25%;"></div>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center space-x-2">
+      <!-- Slide Menu / Table of Contents -->
+      <button onclick="toggleSlideMenu()" title="Daftar Slide (M)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button onclick="toggleTheme()" title="Ganti Tema (T)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg id="themeIconSun" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+        <svg id="themeIconMoon" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button onclick="toggleFullscreen()" title="Layar Penuh (F)" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE VIEWPORT CONTAINER -->
+  <main id="slideContainer" class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 lg:p-10 flex items-center justify-center relative">
+
+    <!-- ==========================================
+         SLIDE 1: COVER
+         ========================================== -->
+    <div class="slide slide-enter w-full max-w-6xl mx-auto flex flex-col items-center justify-center text-center py-4">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-950/90 border border-purple-300 dark:border-purple-800 text-purple-800 dark:text-purple-300 text-sm font-bold mb-6 shadow-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping"></span>
+        Praktikum Algoritma & Struktur Data • Modul 5 Edisi 2026
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-tight mb-5">
+        Modul 5: <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-indigo-400 to-cyan-400">Varian Linked List</span>
+      </h1>
+
+      <p class="text-lg sm:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mb-8 leading-relaxed font-normal">
+        Menguasai <b>Doubly Linked List</b> (penelusuran bolak-balik & hapus ujung $O(1)$) dan <b>Circular Linked List</b> (rantai melingkar berujung tunggal), memverifikasi dua invarian utama, serta membongkar bug diam via detektor <code class="text-purple-600 dark:text-purple-400 font-bold font-mono">utuh()</code>.
+      </p>
+
+      <!-- 4 Highlight Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full max-w-5xl mb-8 text-left">
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-purple-500/20 shadow-md hover:border-purple-500/50 transition">
+          <div class="text-purple-500 font-extrabold text-2xl mb-1">01. Dua Arah</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Bebas maju-mundur via pointer <code class="font-mono text-purple-400">prev</code> dan <code class="font-mono text-purple-400">next</code>. Hapus ekor seketika $O(1)$.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-indigo-500/20 shadow-md hover:border-indigo-500/50 transition">
+          <div class="text-indigo-500 font-extrabold text-2xl mb-1">02. Dua Invarian</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Relasi dua arah <code class="font-mono text-indigo-400">p->next->prev == p</code>. Menangkap kesalahan pointer tepat di lokasi penyebabnya via <code class="font-mono">utuh()</code>.</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-cyan-500/20 shadow-md hover:border-cyan-500/50 transition">
+          <div class="text-cyan-500 font-extrabold text-2xl mb-1">03. Circular Ring</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">Cukup pegang <code class="font-mono text-cyan-400">tail</code>, otomatis kuasai kepala & ekor. Wajib loop <code class="font-mono">do-while</code>!</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-500/20 shadow-md hover:border-amber-500/50 transition">
+          <div class="text-amber-500 font-extrabold text-2xl mb-1">04. Overhead 24 Byte</div>
+          <div class="text-sm text-slate-600 dark:text-slate-400 font-medium">83% memori dipakai untuk pointer dan padding. Pahami kapan linked list tepat digunakan.</div>
+        </div>
+      </div>
+
+      <!-- Quick Action -->
+      <div class="flex flex-col sm:flex-row items-center gap-4">
+        <button onclick="nextSlide()" class="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-base shadow-xl shadow-purple-500/30 transition transform hover:-translate-y-0.5 flex items-center gap-3">
+          <span>Mulai Presentasi</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+        </button>
+        <span class="text-xs text-slate-500 dark:text-slate-400">Tekan <kbd class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 font-mono text-xs">Space</kbd> atau <kbd class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-800 font-mono text-xs">→</kbd> di keyboard</span>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 2: THE WHY — MASALAH SINGLY YANG BELUM SELESAI
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-5">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/70 border border-purple-300 dark:border-purple-800">
+          The Big Question • Refleksi Modul 4
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white mt-2">
+          "Pekan Lalu Singly Linked List Sudah Keren, Apa yang Kurang?"
+        </h2>
+        <p class="text-base sm:text-xl text-slate-600 dark:text-slate-400 mt-1">
+          Dua kelemahan menyakitkan dari Singly Linked List yang memicu lahirnya Doubly & Circular:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <!-- Problem 1 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-rose-500/30 shadow-md">
+          <div class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center font-black text-xl mb-3">
+            🙈
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1. Keterbatasan Penelusuran Satu Arah</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Pada Singly Linked List, tiap node cuma punya pointer <code class="font-mono text-teal-400">next</code>. Kamu cuma bisa maju, <b>tidak bisa mundur</b>! Ingin mencetak list dari belakang? Mustahil tanpa menyalin seluruh list atau rekursi yang boros stack. Ingin menyisipkan <i>sebelum</i> suatu node? Harus mulai jalan kaki dari head lagi!
+          </p>
+        </div>
+
+        <!-- Problem 2 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-500/30 shadow-md">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black text-xl mb-3">
+            🐢
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">2. Hapus Akhir Tetap Lambat O(N) Walaupun Punya Tail!</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Ini fakta mengejutkan: di Singly, memasang pointer <code class="font-mono text-amber-400">tail</code> cuma mempercepat tambah akhir, tapi <b>tidak menolong penghapusan akhir sama sekali</b>! Kenapa? Karena saat tail dihapus, pointer tail harus mundur ke node $N-2$, padahal Singly tidak punya jalan mundur. Kamu tetap harus menelusuri $N$ langkah dari head!
+          </p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-xs sm:text-sm text-purple-900 dark:text-purple-200 font-medium">
+        💡 <b>Solusi Modul 5:</b> Tambahkan pointer <code class="font-mono text-purple-600 dark:text-purple-300 font-bold">prev</code> $	o$ jadilah <b>Doubly Linked List</b>. Sambungkan ujung ekor kembali ke kepala $	o$ jadilah <b>Circular Linked List</b>!
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 3: ANATOMI DOUBLY & OVERHEAD MEMORI 24 BYTE
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          Dasar Teori 5.2.1 • Struktur Fisik
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Anatomi Doubly Linked List & Overhead 24 Byte
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Dua pointer per gerbong: <code class="font-mono text-purple-500">prev</code> ke pendahulu, <code class="font-mono text-cyan-500">next</code> ke penerus.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Struct Declarations -->
+        <div class="space-y-4">
+          <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+            <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+              <span>doubly_node.cpp</span>
+              <span class="text-purple-400 font-bold">sizeof = 24 Byte</span>
+            </div>
+<pre class="leading-relaxed"><code><span class="text-purple-400">struct</span> <span class="text-teal-400">node_t</span> {
+    node_t *prev;  <span class="text-slate-500">// 8 byte (alamat node sebelumnya)</span>
+    <span class="text-emerald-400">int</span> info;      <span class="text-slate-500">// 4 byte (muatan data)</span>
+    node_t *next;  <span class="text-slate-500">// 8 byte (alamat node sesudahnya)</span>
+    <span class="text-slate-500">// + 4 byte padding alignment 64-bit = 24 Byte!</span>
+};
+
+<span class="text-purple-400">struct</span> <span class="text-teal-400">list_t</span> {
+    node_t *head;  <span class="text-slate-500">// node pertama atau nullptr</span>
+    node_t *tail;  <span class="text-slate-500">// node terakhir atau nullptr</span>
+    <span class="text-emerald-400">int</span> nef;       <span class="text-slate-500">// banyaknya node yang hidup</span>
+};</code></pre>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium">
+            🎯 <b>Tail Bukan Hiasan:</b> Berkat pointer <code class="font-mono text-purple-400">prev</code>, saat menghapus <code class="font-mono">tail</code> kita bisa langsung mundur ke <code class="font-mono">tail->prev</code> dalam 1 langkah! Hapus akhir resmi menjadi <b>O(1)</b>.
+          </div>
+        </div>
+
+        <!-- The Memory Tax Card -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-500/30 shadow-md space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">⚖️</span>
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">Analisis Kebutuhan Memori (Memory Overhead) 64-bit:</h4>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Perhatikan perbandingan menyimpan 1 juta bilangan bulat (<code class="font-mono">int</code> = 4 byte):
+          </p>
+          <div class="space-y-2 text-xs font-mono">
+            <div class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 flex justify-between">
+              <span>Array Statis (1 jt int):</span>
+              <b class="text-emerald-500">3.8 MiB</b>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 flex justify-between">
+              <span>Singly Linked List (16B / node):</span>
+              <b class="text-teal-500">15.3 MiB</b>
+            </div>
+            <div class="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/60 border border-purple-400 flex justify-between text-purple-900 dark:text-purple-200">
+              <span>Doubly Linked List (24B / node):</span>
+              <b class="text-rose-500 font-bold">22.9 MiB (6x lipat array!)</b>
+            </div>
+          </div>
+          <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-[11px] text-amber-900 dark:text-amber-200">
+            <b>Fakta Nyata:</b> Pada doubly linked list berisi int, <b>83% memorinya habis hanya untuk pointer dan padding</b>, bukan untuk datanya! Ini alasan kita harus cerdas memilih struktur data sesuai kebutuhan.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 4: DUA INVARIAN PADA DOUBLY LINKED LIST
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/70 border border-purple-300 dark:border-purple-800">
+          Konsep Kunci • 5.2.1.2
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          Dua Invarian pada Doubly Linked List
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Doubly linked list memiliki dua pernyataan logika matematika yang <b>wajib selalu bernilai benar</b> setiap saat:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+        <!-- Invariant 1 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-indigo-500/40 shadow-sm space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-indigo-500 uppercase font-mono">Invarian 1 (Maju lalu Mundur)</span>
+            <span class="px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 text-xs font-bold font-mono">p &rarr; next &rarr; prev</span>
+          </div>
+          <code class="text-base sm:text-lg font-mono font-bold text-indigo-600 dark:text-indigo-400 block p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60">
+            p->next->prev == p
+          </code>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Berlaku untuk setiap node <code class="font-mono">p</code> yang memiliki <code class="font-mono">next</code>. Jika kamu melangkah maju ke tetangga kanan, lalu menoleh ke kiri, kamu <b>wajib kembali menatap dirimu sendiri</b>!
+          </p>
+        </div>
+
+        <!-- Invariant 2 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-purple-500/40 shadow-sm space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-purple-500 uppercase font-mono">Invarian 2 (Mundur lalu Maju)</span>
+            <span class="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-600 text-xs font-bold font-mono">p &rarr; prev &rarr; next</span>
+          </div>
+          <code class="text-base sm:text-lg font-mono font-bold text-purple-600 dark:text-purple-400 block p-3 rounded-xl bg-purple-50 dark:bg-purple-950/60">
+            p->prev->next == p
+          </code>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Berlaku untuk setiap node <code class="font-mono">p</code> yang memiliki <code class="font-mono">prev</code>. Jika kamu melangkah mundur ke tetangga kiri, lalu menoleh ke kanan, kamu <b>wajib kembali menatap dirimu sendiri</b>!
+          </p>
+        </div>
+      </div>
+
+      <!-- Boundary conditions -->
+      <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-200">
+        <span class="text-amber-400 font-bold">Syarat Batas di Ujung List:</span>
+        <div><code class="text-cyan-300">head->prev == nullptr</code> dan <code class="text-cyan-300">tail->next == nullptr</code></div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 5: FUNGSI DETEKTOR BUG MANDIRI: UTUH(L)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          TODO 1 Praktikum • Alat Uji Nyata
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Fungsi Pemeriksa: <code class="text-purple-500 font-mono">bool utuh(const list_t &L)</code>
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Rantai yang putus tidak menimbulkan pesan kesalahan. Program tetap jalan lalu crash 200 baris kemudian. Fungsi ini mendeteksi kesalahan pointer secara langsung pada operasi yang merusaknya, bukan saat program sudah berjalan jauh.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Explanation Left -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">Cara Kerja Fungsi utuh():</h4>
+            <ol class="text-xs sm:text-sm space-y-2 text-slate-600 dark:text-slate-300 list-decimal list-inside">
+              <li>Periksa apakah <code class="font-mono">head->prev</code> ada isinya? Jika ada $	o$ <b>palsu / rusak</b>!</li>
+              <li>Periksa apakah <code class="font-mono">tail->next</code> ada isinya? Jika ada $	o$ <b>rusak</b>!</li>
+              <li>Jelajahi seluruh node: periksa apakah <code class="font-mono">p->next->prev == p</code> dan <code class="font-mono">p->prev->next == p</code>.</li>
+              <li>Jika ada 1 saja jabat tangan yang putus sepihak $	o$ langsung return <code class="font-mono text-rose-500">false</code>!</li>
+            </ol>
+          </div>
+
+          <div class="p-4 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-300 text-xs sm:text-sm text-purple-900 dark:text-purple-200 font-medium">
+            <b>Saran Pengerjaan:</b> Panggil <code class="font-mono font-bold">utuh(L)</code> setelah <b>setiap</b> operasi yang mengubah pointer. Bila fungsi mengembalikan false, operasi tersebut yang perlu diperbaiki.
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>utuh.cpp (Solusi TODO 1)</span>
+            <span class="text-emerald-400 font-bold">LULUS</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-emerald-400">bool</span> <span class="text-blue-400">utuh</span>(<span class="text-purple-400">const</span> list_t &L) {
+    <span class="text-slate-500">// 1. Syarat batas kedua ujung</span>
+    <span class="text-purple-400">if</span> (L.head && L.head-&gt;prev != <span class="text-purple-400">nullptr</span>) <span class="text-purple-400">return false</span>;
+    <span class="text-purple-400">if</span> (L.tail && L.tail-&gt;next != <span class="text-purple-400">nullptr</span>) <span class="text-purple-400">return false</span>;
+
+    <span class="text-slate-500">// 2. Uji cermin dua arah di seluruh node</span>
+    <span class="text-purple-400">for</span> (node_t *p = L.head; p != <span class="text-purple-400">nullptr</span>; p = p-&gt;next) {
+        <span class="text-purple-400">if</span> (p-&gt;next && p-&gt;next-&gt;prev != p) <span class="text-purple-400">return false</span>;
+        <span class="text-purple-400">if</span> (p-&gt;prev && p-&gt;prev-&gt;next != p) <span class="text-purple-400">return false</span>;
+    }
+    <span class="text-purple-400">return true</span>;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 6: PENELUSURAN DUA ARAH: CETAKMAJU & CETAKMUNDUR
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          Dasar Teori 5.2.2.1 • Pengujian Termurah
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Penelusuran Dua Arah: CetakMaju & CetakMundur
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Pengujian paling murah sedunia: Cetak maju dari head, cetak mundur dari tail. Apakah yang satu kebalikan persis dari yang lain?
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Forward and Backward Code -->
+        <div class="space-y-4">
+          <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+            <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+              <span>traversal_dua_arah.cpp</span>
+              <span class="text-purple-400">Simetris</span>
+            </div>
+<pre class="leading-relaxed"><code><span class="text-slate-500">// Dari DEPAN ke BELAKANG (mulai head, ikuti next)</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">CetakMaju</span>(<span class="text-purple-400">const</span> list_t &L) {
+    <span class="text-purple-400">for</span> (node_t *p = L.head; p; p = p-&gt;next)
+        cout &lt;&lt; p-&gt;info &lt;&lt; <span class="text-amber-200">' '</span>;
+}
+
+<span class="text-slate-500">// Dari BELAKANG ke DEPAN (mulai tail, ikuti prev)</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">CetakMundur</span>(<span class="text-purple-400">const</span> list_t &L) {
+    <span class="text-purple-400">for</span> (node_t *p = L.tail; p; p = p-&gt;prev)
+        cout &lt;&lt; p-&gt;info &lt;&lt; <span class="text-amber-200">' '</span>;
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Output Visual Box -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-purple-500/30 shadow-md space-y-4">
+          <h4 class="font-bold text-slate-900 dark:text-white text-base">Contoh Output Rantai Valid:</h4>
+          <div class="p-4 rounded-xl bg-slate-950 font-mono text-xs sm:text-sm space-y-2 border border-slate-800">
+            <div class="flex items-center justify-between text-teal-400">
+              <span>maju   : 7 10 4 13</span>
+              <span class="text-slate-500">head &rarr; tail</span>
+            </div>
+            <div class="flex items-center justify-between text-purple-400">
+              <span>mundur : 13 4 10 7</span>
+              <span class="text-slate-500">tail &rarr; head</span>
+            </div>
+            <div class="pt-2 border-t border-slate-800 flex justify-between text-emerald-400 font-bold">
+              <span>utuh(L) = true</span>
+              <span>nef = 4</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            Jika kamu mencetak mundur tapi hasilnya berhenti di tengah atau menghasilkan urutan angka yang aneh, artinya pointer <code class="font-mono text-rose-500">prev</code> salah satu node lupa disambungkan!
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 7: INSERTLAST & KONDISI BATAS LIST KOSONG
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          TODO 2 Praktikum • 5.2.2.2
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          InsertLast: Tambah Akhir & Batas List Kosong
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Menyisipkan elemen di akhir list. Karena kita memegang <code class="font-mono text-purple-400">tail</code>, biayanya instan <b>0 node dilewati: O(1)</b>!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Logic Explanation -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">Dua Skenario InsertLast:</h4>
+            <div class="space-y-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+              <div class="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-300">
+                <b class="text-purple-700 dark:text-purple-300">1. List Masih Kosong (L.tail == nullptr):</b>
+                <p class="mt-0.5">Node baru adalah satu-satunya elemen, maka <b>head JUGA wajib menunjuk node baru</b> (<code class="font-mono">L.head = baru;</code>).</p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
+                <b class="text-slate-800 dark:text-slate-200">2. List Sudah Punya Elemen:</b>
+                <p class="mt-0.5">Sambungkan ekor lama ke node baru: <code class="font-mono">L.tail->next = baru;</code>.</p>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500">Terakhir, pindahkan tail ke node baru: <code class="font-mono text-purple-400 font-bold">L.tail = baru; L.nef++;</code></p>
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>InsertLast.cpp (Solusi TODO 2)</span>
+            <span class="text-emerald-400 font-bold">Biaya: O(1)</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-purple-400">void</span> <span class="text-blue-400">InsertLast</span>(list_t &L, <span class="text-emerald-400">int</span> x) {
+    node_t *baru = <span class="text-purple-400">new</span> node_t;
+    baru-&gt;info = x;
+    baru-&gt;next = <span class="text-purple-400">nullptr</span>;
+    baru-&gt;prev = L.tail; <span class="text-slate-500">// Menghadap ke ekor lama</span>
+
+    <span class="text-purple-400">if</span> (L.tail == <span class="text-purple-400">nullptr</span>) {
+        L.head = baru;   <span class="text-slate-500">// List kosong: head ikut diisi!</span>
+    } <span class="text-purple-400">else</span> {
+        L.tail-&gt;next = baru; <span class="text-slate-500">// Sambung maju</span>
+    }
+
+    L.tail = baru;       <span class="text-slate-500">// Pindahkan ekor</span>
+    L.nef++;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 8: URUTAN 4 PENUGASAN INSERTAFTER
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950 border border-purple-300 dark:border-purple-800">
+          TODO 3 Praktikum • 5.2.2.3 & 5.2.2.4
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          InsertAfter: Urutan 4 Penugasan Pointer
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Menyisipkan node baru tepat sesudah node <code class="font-mono text-purple-400">q</code>. Urutan 4 penugasan ini harus dijalankan sesuai urutannya agar tidak kehilangan alamat node.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- 4 Steps -->
+        <div class="space-y-3">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 text-xs sm:text-sm">
+            <h4 class="font-bold text-purple-600 dark:text-purple-400 text-base mb-1">Urutan Wajib 4 Penugasan:</h4>
+            <div class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 font-mono"><b>1.</b> <code class="text-purple-400">baru->prev = q;</code></div>
+            <div class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 font-mono"><b>2.</b> <code class="text-purple-400">baru->next = q->next;</code></div>
+            <div class="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-400 font-mono">
+              <b>3.</b> <code class="text-indigo-600 dark:text-indigo-300">if (q->next) q->next->prev = baru; else L.tail = baru;</code>
+            </div>
+            <div class="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-400 font-mono">
+              <b class="text-rose-600 dark:text-rose-400">4.</b> <code class="text-rose-600 dark:text-rose-400 font-bold">q->next = baru; // WAJIB PALING TERAKHIR!</code>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 text-xs text-rose-900 dark:text-rose-200">
+            <b>Dampak Jika q->next Diubah Terlalu Awal:</b> Alamat penerus lama tertimpa. Langkah berikutnya akan menghasilkan <code class="font-mono">baru->next = baru</code> (node menunjuk ke dirinya sendiri), dan sisa rantai di sebelah kanan terputus.
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>InsertAfter.cpp (Solusi TODO 3)</span>
+            <span class="text-emerald-400 font-bold">4 Assignment</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-purple-400">void</span> <span class="text-blue-400">InsertAfter</span>(list_t &L, node_t *q, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (!q) <span class="text-purple-400">return</span>;
+    node_t *baru = <span class="text-purple-400">new</span> node_t;
+    baru-&gt;info = x;
+
+    baru-&gt;prev = q;         <span class="text-slate-500">// 1. Sambung kiri baru</span>
+    baru-&gt;next = q-&gt;next;   <span class="text-slate-500">// 2. Sambung kanan baru</span>
+
+    <span class="text-purple-400">if</span> (q-&gt;next != <span class="text-purple-400">nullptr</span>) {
+        q-&gt;next-&gt;prev = baru; <span class="text-slate-500">// 3a. Tetangga kanan balik menunjuk baru</span>
+    } <span class="text-purple-400">else</span> {
+        L.tail = baru;        <span class="text-slate-500">// 3b. q adalah tail, pindahkan tail!</span>
+    }
+
+    q-&gt;next = baru;         <span class="text-slate-500">// 4. TERAKHIR: q menunjuk baru</span>
+    L.nef++;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 9: INSERTBEFORE & PENANGANAN HEAD
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          TODO 4 Praktikum • 5.2.2.5
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          InsertBefore: Menyisipkan Sebelum Node & Batas Head
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Menyisipkan node baru tepat di depan node <code class="font-mono text-purple-400">q</code>. Pada singly ini butuh jalan kaki dari depan, di doubly ini <b>O(1) langsung</b>!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Logic Explanation -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">Cermin dari InsertAfter:</h4>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Logikanya sama persis dengan InsertAfter, hanya arahnya yang terbalik:
+            </p>
+            <ul class="text-xs sm:text-sm space-y-2 text-slate-600 dark:text-slate-400">
+              <li>• Node baru menunjuk <code class="font-mono text-purple-400">q</code> sebagai next, dan <code class="font-mono text-purple-400">q->prev</code> sebagai prev.</li>
+              <li>• <b>Batas Head:</b> Jika <code class="font-mono">q == L.head</code> (artinya <code class="font-mono">q->prev == nullptr</code>), maka node baru resmi menjadi kepala baru: <code class="font-mono text-emerald-500 font-bold">L.head = baru;</code>!</li>
+              <li>• Jangan lupa: <code class="font-mono text-purple-400">q->prev = baru;</code>.</li>
+            </ul>
+          </div>
+
+          <div class="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-300 text-xs sm:text-sm text-teal-900 dark:text-teal-200 font-medium">
+            ✔ <b>Periksa Invarian:</b> Begitu selesai, <code class="font-mono">L.head->prev</code> harus tetap <code class="font-mono">nullptr</code> dan <code class="font-mono">utuh(L)</code> wajib mengembalikan true.
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>InsertBefore.cpp (Solusi TODO 4)</span>
+            <span class="text-emerald-400 font-bold">Batas: q == head</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-purple-400">void</span> <span class="text-blue-400">InsertBefore</span>(list_t &L, node_t *q, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (!q) <span class="text-purple-400">return</span>;
+    node_t *baru = <span class="text-purple-400">new</span> node_t;
+    baru-&gt;info = x;
+
+    baru-&gt;next = q;         <span class="text-slate-500">// 1. Sambung kanan ke q</span>
+    baru-&gt;prev = q-&gt;prev;   <span class="text-slate-500">// 2. Sambung kiri ke pendahulu q</span>
+
+    <span class="text-purple-400">if</span> (q-&gt;prev != <span class="text-purple-400">nullptr</span>) {
+        q-&gt;prev-&gt;next = baru; <span class="text-slate-500">// 3a. Pendahulu menunjuk baru</span>
+    } <span class="text-purple-400">else</span> {
+        L.head = baru;        <span class="text-slate-500">// 3b. q adalah head! Pindahkan head</span>
+    }
+
+    q-&gt;prev = baru;         <span class="text-slate-500">// 4. q menunjuk baru ke kiri</span>
+    L.nef++;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 10: DELETENODE: HAPUS KILAT O(1)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          TODO 5 Praktikum • 5.2.2.6
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          DeleteNode: Hapus Node yang Alamatnya Dipegang (O(1))
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Jika alamat node <code class="font-mono text-purple-400">q</code> sudah kita pegang, kita bisa menghapusnya seketika <b>tanpa mencari dan tanpa menelusuri list sama sekali</b>!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- 4 Boundary Cases -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5 text-xs sm:text-sm">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base mb-1">4 Kasus Batas yang Wajib Ditangani:</h4>
+            <div class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800">
+              <b>1. q di Tengah:</b> Tetangga kiri lompat ke tetangga kanan, dan sebaliknya.
+            </div>
+            <div class="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-300">
+              <b>2. q adalah Head (q->prev == nullptr):</b> Pindahkan <code class="font-mono text-purple-500 font-bold">L.head = q->next</code>.
+            </div>
+            <div class="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-300">
+              <b>3. q adalah Tail (q->next == nullptr):</b> Pindahkan <code class="font-mono text-indigo-500 font-bold">L.tail = q->prev</code>.
+            </div>
+            <div class="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300">
+              <b>4. List Berisi 1 Node (q adalah head sekaligus tail):</b> Kedua pointer head & tail menjadi <code class="font-mono text-emerald-600 font-bold">nullptr</code> sempurna!
+            </div>
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>DeleteNode.cpp (Solusi TODO 5)</span>
+            <span class="text-emerald-400 font-bold">0 Node Dilewati</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-purple-400">void</span> <span class="text-blue-400">DeleteNode</span>(list_t &L, node_t *q) {
+    <span class="text-purple-400">if</span> (!q) <span class="text-purple-400">return</span>;
+
+    <span class="text-slate-500">// Sambung pintas sisi kiri</span>
+    <span class="text-purple-400">if</span> (q-&gt;prev != <span class="text-purple-400">nullptr</span>) {
+        q-&gt;prev-&gt;next = q-&gt;next;
+    } <span class="text-purple-400">else</span> {
+        L.head = q-&gt;next; <span class="text-slate-500">// q adalah head</span>
+    }
+
+    <span class="text-slate-500">// Sambung pintas sisi kanan</span>
+    <span class="text-purple-400">if</span> (q-&gt;next != <span class="text-purple-400">nullptr</span>) {
+        q-&gt;next-&gt;prev = q-&gt;prev;
+    } <span class="text-purple-400">else</span> {
+        L.tail = q-&gt;prev; <span class="text-slate-500">// q adalah tail</span>
+    }
+
+    <span class="text-purple-400">delete</span> q; <span class="text-slate-500">// Kembalikan 24 byte ke heap</span>
+    L.nef--;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 11: CIRCULAR LINKED LIST & FILOSOFI TAIL
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-950 border border-cyan-300 dark:border-cyan-800">
+          Varian 2 • 5.2.3 & 5.2.3.1
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+          Circular Linked List: Mengapa Cuma Pegang Tail, Bukan Head?
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Pada circular linked list, pointer <code class="font-mono text-cyan-400">next</code> milik node terakhir menunjuk kembali ke node pertama!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Ouroboros Philosophy -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-cyan-500/30 shadow-md space-y-4">
+          <div class="w-12 h-12 rounded-xl bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-black text-2xl">
+            🔄
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Alasan Memegang Tail daripada Head:</h3>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Pada list melingkar:
+          </p>
+          <ul class="text-xs sm:text-sm space-y-2 text-slate-600 dark:text-slate-300">
+            <li class="flex items-start gap-2">
+              <span class="text-cyan-500 font-bold">✔</span>
+              <span>Dari <code class="font-mono text-cyan-400 font-bold">tail</code>, kita bisa menemukan <code class="font-mono text-emerald-400 font-bold">head</code> dalam <b>1 langkah</b>: <code class="font-mono">head = tail->next;</code>!</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-rose-500 font-bold">✖</span>
+              <span>Sebaliknya, jika kamu cuma memegang <code class="font-mono">head</code>, untuk mencari <code class="font-mono">tail</code> kamu harus berputar mengelilingi $N$ node!</span>
+            </li>
+          </ul>
+          <div class="p-3 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-300 text-xs text-cyan-900 dark:text-cyan-200 font-medium">
+            💡 <b>Kesimpulan Elegan:</b> Dengan hanya menyimpan <b>satu variabel pointer saja (<code class="font-mono">tail</code>)</b> di dalam <code class="font-mono">clist_t</code>, kita otomatis menguasai kedua ujung (awal dan akhir) secara bersamaan!
+          </div>
+        </div>
+
+        <!-- Struct Declaration -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>circular_singly.cpp</span>
+            <span class="text-cyan-400 font-bold">Ringkas & Hemat</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-slate-500">// Node tetap sederhana (seperti singly modul 4)</span>
+<span class="text-purple-400">struct</span> <span class="text-teal-400">cnode_t</span> {
+    <span class="text-emerald-400">int</span> info;
+    cnode_t *next;
+};
+
+<span class="text-slate-500">// List HANYA memegang TAIL!</span>
+<span class="text-purple-400">struct</span> <span class="text-teal-400">clist_t</span> {
+    cnode_t *tail; <span class="text-slate-500">// head = tail-&gt;next</span>
+    <span class="text-emerald-400">int</span> nef;
+};
+
+<span class="text-purple-400">void</span> <span class="text-blue-400">CBuat</span>(clist_t &C) {
+    C.tail = <span class="text-purple-400">nullptr</span>;
+    C.nef = <span class="text-amber-300">0</span>;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 12: PENELUSURAN CIRCULAR: WAJIB DO-WHILE
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest">
+          TODO 8 Praktikum • 5.2.3.2
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Penelusuran Circular: Kenapa Wajib <code class="text-cyan-400 font-mono">do-while</code>?
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Mencetak seluruh elemen list melingkar dari kepala sampai ekor. Mengapa <code class="font-mono text-rose-500">while</code> biasa gagal total?
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- Why do-while -->
+        <div class="space-y-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">Jebakan Maut Perulangan Melingkar:</h4>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Jika kamu memulai dari <code class="font-mono">p = head</code> lalu menulis:
+            </p>
+            <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 font-mono text-xs text-rose-800 dark:text-rose-200">
+              while (p != head) { cout &lt;&lt; p->info; p = p->next; }
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Kondisi <code class="font-mono">p != head</code> langsung <b>FALSE di langkah pertama</b>! Perulangan langsung bubar tanpa mencetak satu pun angka.
+            </p>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Dengan <code class="font-mono text-cyan-400 font-bold">do { ... } while (p != head);</code>, badan perulangan dijamin berjalan <b>minimal 1 kali dulu</b> sebelum memeriksa apakah sudah kembali ke kepala!
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-xs text-amber-900 dark:text-amber-200 font-medium">
+            ⚠️ <b>Batas List Kosong:</b> Jika list kosong (<code class="font-mono">tail == nullptr</code>), <code class="font-mono">tail->next</code> akan crash instan! Wajib ada penjaga: <code class="font-mono">if (!C.tail) { cout &lt;&lt; "(kosong)"; return; }</code>.
+          </div>
+        </div>
+
+        <!-- Code Block -->
+        <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl font-mono text-xs sm:text-sm text-slate-200">
+          <div class="text-slate-400 pb-2 mb-2 border-b border-slate-800 flex justify-between">
+            <span>CCetak.cpp (Solusi TODO 8)</span>
+            <span class="text-cyan-400 font-bold">do-while</span>
+          </div>
+<pre class="leading-relaxed"><code><span class="text-purple-400">void</span> <span class="text-blue-400">CCetak</span>(<span class="text-purple-400">const</span> clist_t &C) {
+    <span class="text-slate-500">// 1. Tangani list kosong terlebih dahulu!</span>
+    <span class="text-purple-400">if</span> (C.tail == <span class="text-purple-400">nullptr</span>) {
+        cout &lt;&lt; <span class="text-amber-200">"(kosong)"</span>;
+        <span class="text-purple-400">return</span>;
+    }
+
+    <span class="text-slate-500">// 2. Mulai dari head (tetangga kanan tail)</span>
+    cnode_t *head = C.tail-&gt;next;
+    cnode_t *p = head;
+
+    <span class="text-slate-500">// 3. Cetak dulu, baru uji apakah sudah 1 putaran</span>
+    <span class="text-purple-400">do</span> {
+        cout &lt;&lt; p-&gt;info &lt;&lt; <span class="text-amber-200">" "</span>;
+        p = p-&gt;next;
+    } <span class="text-purple-400">while</span> (p != head);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 13: CINSERTLAST & CDEALLOCATE
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest">
+          TODO 7 & TODO 9 Praktikum • 5.2.3.3 & 5.2.3.5
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          CInsertLast & Cara Kerja CDeallocate
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Menambah elemen di list melingkar dan cara membebaskan memorinya tanpa terjebak infinite loop.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <!-- CInsertLast -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-cyan-600 dark:text-cyan-400 text-base">CInsertLast (TODO 7)</h4>
+            <span class="px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950 text-cyan-700 text-xs font-mono font-bold">O(1)</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            List kosong: node baru <b>menunjuk dirinya sendiri</b> (<code class="font-mono">baru->next = baru;</code>). Jika sudah ada elemen: node baru disisipkan di antara tail dan head!
+          </p>
+          <div class="bg-slate-900 rounded-xl p-3 font-mono text-xs text-slate-200">
+<pre><code><span class="text-purple-400">void</span> <span class="text-blue-400">CInsertLast</span>(clist_t &C, <span class="text-emerald-400">int</span> x) {
+    cnode_t *baru = <span class="text-purple-400">new</span> cnode_t;
+    baru-&gt;info = x;
+    <span class="text-purple-400">if</span> (C.tail == <span class="text-purple-400">nullptr</span>) {
+        baru-&gt;next = baru; <span class="text-slate-500">// Menunjuk dirinya</span>
+        C.tail = baru;
+    } <span class="text-purple-400">else</span> {
+        baru-&gt;next = C.tail-&gt;next; <span class="text-slate-500">// Sambung ke head</span>
+        C.tail-&gt;next = baru;
+        C.tail = baru;
+    }
+    C.nef++;
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- CDeallocate -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-rose-600 dark:text-rose-400 text-base">CDeallocate (TODO 9)</h4>
+            <span class="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-600 text-xs font-mono font-bold">Putus Dulu!</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            Pada lingkaran, <code class="font-mono">while (p != nullptr)</code> berputar selamanya! <b>Wajib putuskan lingkarannya dulu</b>: jadikan <code class="font-mono text-rose-400 font-bold">C.tail->next = nullptr;</code>!
+          </p>
+          <div class="bg-slate-900 rounded-xl p-3 font-mono text-xs text-slate-200">
+<pre><code><span class="text-purple-400">void</span> <span class="text-blue-400">CDeallocate</span>(clist_t &C) {
+    <span class="text-purple-400">if</span> (C.tail == <span class="text-purple-400">nullptr</span>) <span class="text-purple-400">return</span>;
+    cnode_t *head = C.tail-&gt;next;
+    C.tail-&gt;next = <span class="text-purple-400">nullptr</span>; <span class="text-slate-500">// 1. PUTUS LINGKARAN!</span>
+    cnode_t *p = head;
+    <span class="text-purple-400">while</span> (p != <span class="text-purple-400">nullptr</span>) {
+        cnode_t *berikut = p-&gt;next;
+        <span class="text-purple-400">delete</span> p;
+        p = berikut;
+    }
+    C.tail = <span class="text-purple-400">nullptr</span>; C.nef = <span class="text-amber-300">0</span>;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 14: SIMULATOR ANIMASI FISIK KONTINU (GSAP 60 FPS)
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-1">
+      <div class="mb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950 border border-purple-300 dark:border-purple-800">
+            Laboratorium Interaktif • GSAP 60 FPS Dynamic Wires
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
+            Simulator Animasi: Penautan & Pemutusan Node Kontinu
+          </h2>
+        </div>
+
+        <!-- Mode Toggle -->
+        <div class="flex gap-1.5 p-1 rounded-2xl bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-800">
+          <button onclick="switchMode('doubly')" id="btnModeDoubly" class="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-purple-600 text-white shadow-sm transition">
+            Doubly Linked List
+          </button>
+          <button onclick="switchMode('circular')" id="btnModeCircular" class="px-3.5 py-1.5 rounded-xl font-bold text-xs text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-white transition">
+            Circular Ring
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Stage Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-2">
+        <!-- Left Panel: Controls (Col 4) -->
+        <div class="lg:col-span-4 space-y-2.5">
+          <!-- Parameter & Triggers Card -->
+          <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-400 uppercase">
+              <span>Pilih Animasi Operasi</span>
+              <span id="allocBalanceBadge" class="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono font-bold bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-800">Alloc: 4 | Del: 0</span>
+            </div>
+
+            <!-- Inputs (Light mode: dark text on light bg; Dark mode: light text on dark bg) -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[10px] text-slate-600 dark:text-slate-400 font-bold block mb-0.5">Nilai Baru (x):</label>
+                <input type="number" id="inputValX" value="9" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-xs text-slate-900 dark:text-white shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-500">
+              </div>
+              <div>
+                <label class="text-[10px] text-slate-600 dark:text-slate-400 font-bold block mb-0.5">Target Node (q):</label>
+                <select id="selectTargetQ" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-xs text-slate-900 dark:text-white shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+            </div>
+
+            <!-- Doubly Operation Buttons -->
+            <div id="doublyActionGroup" class="space-y-1.5 pt-1">
+              <button onclick="playInsertAfterAnim()" class="w-full py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-between shadow-sm transition">
+                <span>🎬 Animasi InsertAfter(q, x)</span>
+                <span class="text-[10px] bg-purple-900/60 px-1.5 py-0.5 rounded">Buka Celah & Taut</span>
+              </button>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button onclick="playInsertBeforeAnim()" class="py-1.5 px-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition">
+                  🎬 InsertBefore
+                </button>
+                <button onclick="playInsertLastAnim()" class="py-1.5 px-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition">
+                  🎬 InsertLast
+                </button>
+              </div>
+              <button onclick="playDeleteNodeAnim()" class="w-full py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-between shadow-sm transition">
+                <span>✂️ Animasi DeleteNode(q)</span>
+                <span class="text-[10px] bg-rose-900/60 px-1.5 py-0.5 rounded">Pintas & Hapus</span>
+              </button>
+              <button onclick="playBrokenOrderAnim()" class="w-full py-1.5 px-3 rounded-xl bg-rose-50 dark:bg-rose-950/80 hover:bg-rose-100 text-rose-700 dark:text-rose-300 font-bold text-xs border border-rose-300 dark:border-rose-700 transition flex items-center justify-center gap-1.5">
+                <span>💥 Simulasi Kesalahan Urutan</span>
+              </button>
+            </div>
+
+            <!-- Circular Operation Buttons -->
+            <div id="circularActionGroup" class="hidden space-y-1.5 pt-1">
+              <button onclick="playCInsertLastAnim()" class="w-full py-2 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs flex items-center justify-between shadow-sm transition">
+                <span>🎬 Animasi CInsertLast(x)</span>
+                <span class="text-[10px] bg-cyan-900/60 px-1.5 py-0.5 rounded">Taut Cincin</span>
+              </button>
+              <button onclick="playCCetakAnim()" class="w-full py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-between shadow-sm transition">
+                <span>🔄 Animasi CCetak() do-while</span>
+                <span class="text-[10px] bg-teal-900/60 px-1.5 py-0.5 rounded">1 Putaran Penuh</span>
+              </button>
+              <button onclick="playCDeallocateAnim()" class="w-full py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center justify-between shadow-sm transition">
+                <span>✂️ Animasi CDeallocate()</span>
+                <span class="text-[10px] bg-amber-900/60 px-1.5 py-0.5 rounded">Gunting Cincin Dulu</span>
+              </button>
+            </div>
+
+            <!-- Reset Button -->
+            <button onclick="resetChainState()" class="w-full py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition border border-slate-200 dark:border-slate-700">
+              🔄 Reset Rantai Awal [7, 10, 4, 13]
+            </button>
+          </div>
+
+          <!-- Video Player Timeline Controller -->
+          <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono space-y-2 text-slate-800 dark:text-slate-200 shadow-sm">
+            <div class="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400">
+              <span class="flex items-center gap-1.5 font-bold">
+                <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
+                TIMELINE SCRUBBER:
+              </span>
+              <div class="flex gap-1">
+                <button onclick="setSpeed(0.5)" id="speed05" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">0.5x</button>
+                <button onclick="setSpeed(1.0)" id="speed10" class="px-1.5 py-0.5 rounded bg-purple-600 text-[10px] text-white font-bold">1x</button>
+                <button onclick="setSpeed(2.0)" id="speed20" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">2x</button>
+              </div>
+            </div>
+
+            <!-- Scrubber Slider -->
+            <input type="range" id="animProgressSlider" min="0" max="100" value="0" step="0.1" oninput="scrubTimeline(this.value)" class="w-full accent-purple-600 cursor-pointer">
+
+            <!-- Play/Pause & Step Buttons -->
+            <div class="flex items-center justify-between pt-1">
+              <div class="flex items-center gap-1.5">
+                <button onclick="stepTimeline(-1)" title="Mundur 1 Langkah" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition border border-slate-200 dark:border-slate-700">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <button onclick="toggleTimelinePlay()" id="btnPlayPause" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md shadow-purple-500/25 flex items-center gap-1 transition">
+                  <span id="playIcon">⏸ Jeda</span>
+                </button>
+                <button onclick="stepTimeline(1)" title="Maju 1 Langkah" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition border border-slate-200 dark:border-slate-700">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+              </div>
+              <button onclick="finishTimeline()" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-400 text-xs transition border border-slate-200 dark:border-slate-700">
+                Selesai ⏭
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Visual Stage (Col 8) -->
+        <div class="lg:col-span-8 flex flex-col justify-between space-y-2">
+          <!-- Status Banner -->
+          <div class="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-800 dark:text-slate-200">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-500 dark:text-slate-400">INVARIAN UTUH():</span>
+              <span id="invStatusBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-500 text-emerald-800 dark:text-emerald-400 font-bold transition-colors">
+                TRUE (Rantai Utuh 100%)
+              </span>
+            </div>
+            <div class="flex items-center gap-3 text-slate-700 dark:text-slate-300 font-bold">
+              <span>Head: <b id="dispHead" class="text-purple-600 dark:text-purple-300">7</b></span>
+              <span>Tail: <b id="dispTail" class="text-cyan-600 dark:text-cyan-300">13</b></span>
+              <span>NEF: <b id="dispNef" class="text-slate-900 dark:text-white">4</b></span>
+            </div>
+            <div id="phaseIndicator" class="px-2.5 py-0.5 rounded-lg bg-purple-100 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-500/50 text-purple-800 dark:text-purple-300 text-[11px] font-bold">
+              Fase: Siap
+            </div>
+          </div>
+
+          <!-- Code Executed Live Badge -->
+          <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-xs flex items-center justify-between text-slate-700 dark:text-slate-400">
+            <span class="text-slate-600 dark:text-slate-400 text-[11px] flex items-center gap-1.5 font-bold">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              STATEMENT C++ SAAT INI:
+            </span>
+            <code id="liveCodeBadge" class="text-purple-700 dark:text-amber-300 font-bold bg-white dark:bg-slate-900 px-3 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800 truncate max-w-md shadow-sm">
+              // Siap menjalankan operasi
+            </code>
+          </div>
+
+          <!-- 60 FPS SVG Visual Canvas (Sleek Dark Lab Stage for highest neon wire contrast) -->
+          <div class="p-2 rounded-2xl bg-slate-950 border border-slate-300 dark:border-slate-800 shadow-xl relative overflow-hidden flex items-center justify-center">
+            <svg id="stageSvg" viewBox="0 0 880 270" class="w-full h-[270px] select-none">
+              <defs>
+                <!-- Standard High-Precision Arrow Markers (orient="auto" points along line tangent into port) -->
+                <marker id="arrowNext" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+                  <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#22d3ee" />
+                </marker>
+                <marker id="arrowPrev" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+                  <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#c084fc" />
+                </marker>
+                <marker id="arrowAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+                  <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#fbbf24" />
+                </marker>
+                <marker id="arrowRose" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+                  <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#f43f5e" />
+                </marker>
+                <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+                  <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#10b981" />
+                </marker>
+                <!-- Glow Filters -->
+                <filter id="glowPurple" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#a855f7" flood-opacity="0.6"/>
+                </filter>
+                <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#22d3ee" flood-opacity="0.7"/>
+                </filter>
+                <filter id="glowAmber" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#f59e0b" flood-opacity="0.8"/>
+                </filter>
+              </defs>
+
+              <!-- Dynamic Live Wire Layer (Continuously Updated on Every Frame) -->
+              <g id="layerDynamicWires"></g>
+
+              <!-- Nodes Layer -->
+              <g id="layerNodes"></g>
+
+              <!-- Floating / New Node Layer -->
+              <g id="layerFloatingNode"></g>
+
+              <!-- Overlays: Scissor cuts & particle markers -->
+              <g id="layerOverlays"></g>
+            </svg>
+          </div>
+
+          <!-- Humanized Narration Box -->
+          <div id="liveNarrationBox" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-xs text-purple-950 dark:text-purple-300 min-h-[44px] flex items-center shadow-sm">
+            List awal siap [7, 10, 4, 13]. Klik salah satu tombol animasi untuk melihat peregangan celah dan penautan kabel pointer dinamis.
+          </div>
+        </div>
+      </div>
+    </div>
+<!-- ==========================================
+         SLIDE 15: NERACA ONGKOS 4 WADAH DATA
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-2">
+      <div class="mb-4">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          Rangkuman Biaya • 5.2.4
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+          Tabel Komparasi 4 Wadah Data (Modul 3 s/d Modul 5)
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 mt-1">
+          Bandingkan langsung performa Array Statis, Singly, Doubly, dan Circular Linked List:
+        </p>
+      </div>
+
+      <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-x-auto mb-4">
+        <table class="w-full text-left text-xs font-mono">
+          <thead>
+            <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-400">
+              <th class="pb-2">Operasi</th>
+              <th class="pb-2">Array</th>
+              <th class="pb-2">Singly</th>
+              <th class="pb-2 text-purple-500 font-bold">Doubly + Tail</th>
+              <th class="pb-2 text-cyan-500 font-bold">Circular + Tail</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+            <tr>
+              <td class="py-2.5 font-bold">Akses elemen ke-i</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+              <td class="py-2.5 text-rose-500">O(n)</td>
+              <td class="py-2.5 text-rose-500">O(n)</td>
+              <td class="py-2.5 text-rose-500">O(n)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 font-bold">Menyisip di awal</td>
+              <td class="py-2.5 text-rose-500">O(n)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 font-bold">Menyisip di akhir</td>
+              <td class="py-2.5 text-emerald-500">O(1)*</td>
+              <td class="py-2.5 text-rose-500">O(n)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 font-bold">Menghapus di awal</td>
+              <td class="py-2.5 text-rose-500">O(n)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 font-bold">Menghapus di akhir</td>
+              <td class="py-2.5 text-emerald-500">O(1)</td>
+              <td class="py-2.5 text-rose-500 font-bold">O(n) (Mundur Buta!)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1) (Via prev!)</td>
+              <td class="py-2.5 text-rose-500">O(n)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 font-bold">Menghapus node dipegang</td>
+              <td class="py-2.5 text-slate-500">—</td>
+              <td class="py-2.5 text-rose-500">O(n)</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(1)</td>
+              <td class="py-2.5 text-rose-500">O(n)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 font-bold">Menelusuri mundur</td>
+              <td class="py-2.5 text-emerald-500">O(n)</td>
+              <td class="py-2.5 text-rose-500">Tidak Bisa</td>
+              <td class="py-2.5 text-emerald-500 font-bold">O(n)</td>
+              <td class="py-2.5 text-rose-500">Tidak Bisa</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-300 text-xs text-purple-900 dark:text-purple-200">
+        💡 <b>Insight Penutup:</b> Baris pertama (akses ke-i) tidak pernah berubah di seluruh kolom linked list. Linked list <b>tidak diciptakan untuk akses indeks</b> — itu hak paten milik Array. Linked list diciptakan untuk kelincahan penyisipan dan penghapusan dinamis!
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 16: FULL CODE EXPLORER & JAWABAN LAPORAN
+         ========================================== -->
+    <div class="slide slide-enter hidden w-full max-w-6xl mx-auto py-1">
+      <div class="mb-3">
+        <span class="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          Solusi & Pembahasan Laporan
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
+          Solusi Lengkap 9 TODO & Pembahasan 4 Soal Laporan
+        </h2>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <button onclick="switchSolTab(1)" id="tabSol1" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm">TODO 1-3 (Invarian & InsAfter)</button>
+        <button onclick="switchSolTab(2)" id="tabSol2" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">TODO 4-6 (InsBefore & DelNode)</button>
+        <button onclick="switchSolTab(3)" id="tabSol3" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">TODO 7-9 (Circular CInsert & CCetak)</button>
+        <button onclick="switchSolTab(4)" id="tabSol4" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-white">Jawaban 4 Soal Laporan (a, b, c, d)</button>
+      </div>
+
+      <!-- Display Box -->
+      <div class="bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-800 shadow-xl font-mono text-xs overflow-x-auto text-slate-200 max-h-[380px]">
+        <div id="solDisplayArea">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM CONTROL BAR -->
+  <footer class="h-16 border-t border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-6 flex items-center justify-between z-30 shrink-0 select-none">
+    <div class="flex items-center space-x-2">
+      <button onclick="prevSlide()" class="px-4 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+        <span>Sebelumnya</span>
+      </button>
+
+      <button onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-purple-500/20 transition flex items-center gap-2">
+        <span>Selanjutnya</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+
+    <!-- Quick Slide Indicator Dots -->
+    <div id="slideDotsContainer" class="hidden md:flex items-center space-x-1.5">
+      <!-- Rendered via JS -->
+    </div>
+
+    <div class="text-xs text-slate-400 font-mono hidden sm:block">
+      Navigasi: <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">→</kbd> | Menu: <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800">M</kbd>
+    </div>
+  </footer>
+
+  <!-- SLIDE MENU MODAL -->
+  <div id="slideMenuModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <h3 class="font-extrabold text-slate-900 dark:text-white text-base">
+          Daftar Slide Presentasi Modul 5 (2026)
+        </h3>
+        <button onclick="toggleSlideMenu()" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div id="slideMenuList" class="p-4 overflow-y-auto space-y-1">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    const totalSlides = 16;
+    let currentSlide = 0;
+
+    const slideTitles = [
+      "Cover: Modul 5 Varian Linked List (2026)",
+      "The Why: Masalah Singly yang Belum Selesai (Mundur Buta)",
+      "Anatomi Doubly Linked List & Overhead 24 Byte",
+      "Dua Invarian pada Doubly Linked List",
+      "Fungsi Pemeriksa Invarian: bool utuh(L)",
+      "Penelusuran Dua Arah: CetakMaju & CetakMundur",
+      "InsertLast: Tambah Akhir & Batas List Kosong",
+      "InsertAfter: Urutan 4 Penugasan Pointer",
+      "InsertBefore: Menyisipkan Sebelum Node & Batas Head",
+      "DeleteNode: Hapus Node yang Dipegang (O(1))",
+      "Circular Linked List: Mengapa Cukup Memegang Tail",
+      "Penelusuran Circular: Kenapa Wajib do-while?",
+      "CInsertLast & Cara Kerja CDeallocate",
+      "Laboratorium Interaktif: Simulator Doubly & Circular",
+      "Neraca Ongkos 4 Wadah Data (Array, Singly, Doubly, Circular)",
+      "Solusi Lengkap 9 TODO & Pembahasan 4 Soal Laporan"
+    ];
+
+    function updateSlide() {
+      const slides = document.querySelectorAll('.slide');
+      slides.forEach((s, idx) => {
+        if (idx === currentSlide) {
+          s.classList.remove('hidden');
+          s.classList.add('slide-enter');
+        } else {
+          s.classList.add('hidden');
+          s.classList.remove('slide-enter');
+        }
+      });
+
+      document.getElementById('currentSlideNum').textContent = currentSlide + 1;
+      document.getElementById('totalSlideNum').textContent = totalSlides;
+
+      const progress = ((currentSlide + 1) / totalSlides) * 100;
+      document.getElementById('progressBar').style.width = `${progress}%`;
+
+      renderDots();
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(idx) {
+      if (idx >= 0 && idx < totalSlides) {
+        currentSlide = idx;
+        updateSlide();
+        document.getElementById('slideMenuModal').classList.add('hidden');
+      }
+    }
+
+    function renderDots() {
+      const container = document.getElementById('slideDotsContainer');
+      container.innerHTML = Array.from({ length: totalSlides }).map((_, i) => `
+        <button onclick="goToSlide(${i})" title="${slideTitles[i]}" class="h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-6 bg-purple-500' : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'}"></button>
+      `).join('');
+    }
+
+    function toggleSlideMenu() {
+      const modal = document.getElementById('slideMenuModal');
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        const listEl = document.getElementById('slideMenuList');
+        listEl.innerHTML = slideTitles.map((t, i) => `
+          <div onclick="goToSlide(${i})" class="py-2.5 px-3 rounded-xl flex items-center justify-between cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition ${i === currentSlide ? 'bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold' : 'text-slate-700 dark:text-slate-300'}">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs font-mono">${i + 1}</span>
+              <span class="text-xs sm:text-sm">${t}</span>
+            </div>
+            ${i === currentSlide ? '<span class="text-[10px] px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">Aktif</span>' : ''}
+          </div>
+        `).join('');
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault(); nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') {
+        e.preventDefault(); prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault(); goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault(); goToSlide(totalSlides - 1);
+      } else if (e.key === 'm' || e.key === 'M') {
+        toggleSlideMenu();
+      } else if (e.key === 't' || e.key === 'T') {
+        toggleTheme();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
+    });
+
+    // ==========================================
+    // GSAP 60 FPS PURE BIDIRECTIONAL ENGINE (MODUL 5)
+    // FAST, SNAPPY, 100% REVERSIBLE, 0 STATE CORRUPTION
+    // ==========================================
+    let currentMode = 'doubly';
+    let currentTimeline = null;
+    let animSpeed = 1.0;
+    let activeAnimType = 'none';
+
+    const NODE_W = 84;
+    const NODE_H = 52;
+    const BASE_Y = 145;
+    const SPACING = 140;
+
+    // Pure animation model (interpolated continuously from t=0 to t=1)
+    let animModel = {
+      gapProgress: 0,
+      baruY: -60,
+      baruOpacity: 0,
+      linkLeftAlpha: 0,
+      linkRightAlpha: 0,
+      reverseAlpha: 0,
+      cutOldAlpha: 1,
+      qNextAlpha: 0,
+      liftY: 0,
+      targetOpacity: 1,
+      targetScale: 1,
+      bypassAlpha: 0,
+      closeGap: 0,
+      selfLoopAlpha: 0,
+      orphanAlpha: 1,
+      cBaruOpacity: 0,
+      cCircCut: false,
+      cActiveIdx: -1
+    };
+
+    function switchMode(mode) {
+      if (currentTimeline) currentTimeline.kill();
+      currentMode = mode;
+      const btnD = document.getElementById('btnModeDoubly');
+      const btnC = document.getElementById('btnModeCircular');
+      const grpD = document.getElementById('doublyActionGroup');
+      const grpC = document.getElementById('circularActionGroup');
+
+      if (mode === 'doubly') {
+        btnD.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-purple-600 text-white shadow-sm transition";
+        btnC.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-white transition";
+        grpD.classList.remove('hidden');
+        grpC.classList.add('hidden');
+      } else {
+        btnC.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs bg-cyan-600 text-white shadow-sm transition";
+        btnD.className = "px-3.5 py-1.5 rounded-xl font-bold text-xs text-slate-700 dark:text-slate-300 hover:text-white transition";
+        grpC.classList.remove('hidden');
+        grpD.classList.add('hidden');
+      }
+      resetChainState();
+    }
+    const switchSimMode = switchMode;
+
+    function updateSelectOptions() {
+      const sel = document.getElementById('selectTargetQ');
+      if (!sel) return;
+      const defaultNodes = [7, 10, 4, 13];
+      sel.innerHTML = defaultNodes.map((n, i) => `
+        <option value="${i}" class="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+          [${i}] node ${n} ${i===0?'(head)':(i===defaultNodes.length-1?'(tail)':'')}
+        </option>
+      `).join('');
+      sel.value = "1";
+    }
+
+    function resetChainState() {
+      if (currentTimeline) {
+        currentTimeline.kill();
+        currentTimeline = null;
+      }
+      activeAnimType = 'none';
+      animModel = {
+        gapProgress: 0,
+        baruY: -60,
+        baruOpacity: 0,
+        linkLeftAlpha: 0,
+        linkRightAlpha: 0,
+        reverseAlpha: 0,
+        cutOldAlpha: 1,
+        qNextAlpha: 0,
+        liftY: 0,
+        targetOpacity: 1,
+        targetScale: 1,
+        bypassAlpha: 0,
+        closeGap: 0,
+        selfLoopAlpha: 0,
+        orphanAlpha: 1,
+        cBaruOpacity: 0,
+        cCircCut: false,
+        cActiveIdx: -1
+      };
+
+      document.getElementById('animProgressSlider').value = 0;
+      document.getElementById('playIcon').textContent = "▶ Putar";
+      updateSelectOptions();
+      updateInfoBadges(true, "Siap", "// Rantai awal siap", "List awal siap [7, 10, 4, 13]. Klik salah satu tombol animasi untuk menjalankan simulasi.", 4);
+      renderCanvasFrame(0);
+    }
+
+    function updateInfoBadges(isUtuh, phase, code, narration, liveNef = 4) {
+      const invBadge = document.getElementById('invStatusBadge');
+      if (isUtuh) {
+        invBadge.className = "px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-500 text-emerald-800 dark:text-emerald-400 font-bold";
+        invBadge.textContent = "TRUE (Rantai Utuh 100%)";
+      } else {
+        invBadge.className = "px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 border border-rose-300 dark:border-rose-500 text-rose-800 dark:text-rose-400 font-bold animate-pulse";
+        invBadge.textContent = "FALSE (RANTAI PUTUS!)";
+      }
+
+      document.getElementById('dispHead').textContent = "7";
+      document.getElementById('dispTail').textContent = "13";
+      document.getElementById('dispNef').textContent = liveNef;
+      document.getElementById('allocBalanceBadge').textContent = 'Alloc: ' + (liveNef >= 5 ? 5 : 4) + ' | Del: ' + (liveNef <= 3 ? 1 : 0);
+      document.getElementById('phaseIndicator').textContent = "Fase: " + phase;
+      document.getElementById('liveCodeBadge').textContent = code;
+      document.getElementById('liveNarrationBox').innerHTML = narration;
+    }
+
+    // ----------------------------------------------------
+    // PURE DETERMINISTIC SVG CANVAS RENDERER
+    // ----------------------------------------------------
+    function renderCanvasFrame(p) {
+      const dynWiresG = document.getElementById('layerDynamicWires');
+      const nodesG = document.getElementById('layerNodes');
+      const floatG = document.getElementById('layerFloatingNode');
+      const overlayG = document.getElementById('layerOverlays');
+
+      if (!dynWiresG || !nodesG) return;
+
+      let wiresHtml = '';
+      let nodesHtml = '';
+      let floatHtml = '';
+      let overlaysHtml = '';
+
+      if (activeAnimType === 'ins_after') {
+        const startX = 140; // Perfectly centered: nodes span from 140 to 700
+        const gap = animModel.gapProgress * SPACING;
+        const n0_x = startX;                     // 140
+        const n1_x = startX + SPACING;             // 280 (q)
+        const baru_x = startX + 2*SPACING;         // 420 (baru)
+        const n2_x = startX + 2*SPACING + gap;     // 420 -> 560
+        const n3_x = startX + 3*SPACING + gap;     // 560 -> 700
+        const valX = parseInt(document.getElementById('inputValX').value) || 9;
+
+        // Dynamic badges based on progress (Reversible forward & backward!)
+        if (p < 0.18) {
+          updateInfoBadges(true, "1. Buka Celah", "// Membuka celah 140px di sebelah kanan q (10)", "Rantai sebelah kanan meluncur membuka ruang memori untuk node baru.", 4);
+        } else if (p < 0.38) {
+          updateInfoBadges(true, "2. Alokasi Heap", "node_t *baru = new node_t; baru->info = " + valX + ";", "OS memesan 24 byte di Heap. Node baru lahir mengambang di atas celah.", 4);
+        } else if (p < 0.55) {
+          updateInfoBadges(true, "3. Sambung Kiri (baru->prev = q)", "baru->prev = q; // q bernilai 10", "Node baru memegang q (10) ke kiri. Rantai lama belum disentuh.", 4);
+        } else if (p < 0.72) {
+          updateInfoBadges(true, "4. Sambung Kanan (baru->next = q->next)", "baru->next = q->next; // q->next bernilai 4", "Node baru memegang 4 ke kanan. Kedua tangan baru sudah aman.", 4);
+        } else if (p < 0.88) {
+          updateInfoBadges(true, "5. Balik Sambung & Putus", "q->next->prev = baru; q->next = baru; // TERAKHIR!", "Kabel lama diputus ✂️, tetangga kanan dan q mengalihkan pegangan ke baru. 4 penugasan tuntas!", 4);
+        } else {
+          updateInfoBadges(true, "6. Selesai (Node Berlabuh)", "L.nef++; // NEF menjadi 5", "Node " + valX + " meluncur turun mulus menyatu ke barisan utama. Invarian utuh() = TRUE!", 5);
+        }
+
+        // Wires
+        wiresHtml += drawDoubleArrow(n0_x, BASE_Y, n1_x, BASE_Y);
+
+        if (animModel.cutOldAlpha > 0.05) {
+          wiresHtml += drawDoubleArrow(n1_x, BASE_Y, n2_x, BASE_Y, animModel.cutOldAlpha, animModel.cutOldAlpha < 0.7);
+        }
+
+        wiresHtml += drawDoubleArrow(n2_x, BASE_Y, n3_x, BASE_Y);
+
+        // baru->prev
+        if (animModel.linkLeftAlpha > 0) {
+          const sx = baru_x - NODE_W/2;
+          const sy = animModel.baruY + 10;
+          const ex = n1_x + NODE_W/2;
+          const ey = BASE_Y + 10;
+          const cy = (sy + ey) / 2;
+          wiresHtml += `
+            <path d="M ${sx} ${sy} C ${sx - 35} ${cy}, ${ex + 35} ${cy}, ${ex} ${ey}" 
+                  class="wire-cable new-link" stroke="#c084fc" marker-end="url(#arrowPrev)" opacity="${animModel.linkLeftAlpha}" />
+          `;
+        }
+
+        // baru->next
+        if (animModel.linkRightAlpha > 0) {
+          const sx = baru_x + NODE_W/2;
+          const sy = animModel.baruY - 10;
+          const ex = n2_x - NODE_W/2;
+          const ey = BASE_Y - 10;
+          const cy = (sy + ey) / 2;
+          wiresHtml += `
+            <path d="M ${sx} ${sy} C ${sx + 35} ${cy}, ${ex - 35} ${cy}, ${ex} ${ey}" 
+                  class="wire-cable new-link" stroke="#22d3ee" marker-end="url(#arrowNext)" opacity="${animModel.linkRightAlpha}" />
+          `;
+        }
+
+        // q->next->prev = baru
+        if (animModel.reverseAlpha > 0) {
+          const sx = n2_x - NODE_W/2;
+          const sy = BASE_Y + 10;
+          const ex = baru_x + NODE_W/2;
+          const ey = animModel.baruY + 10;
+          const cy = (sy + ey) / 2;
+          wiresHtml += `
+            <path d="M ${sx} ${sy} C ${sx - 30} ${cy}, ${ex + 30} ${cy}, ${ex} ${ey}" 
+                  class="wire-cable new-link" stroke="#c084fc" marker-end="url(#arrowPrev)" opacity="${animModel.reverseAlpha}" />
+          `;
+        }
+
+        // q->next = baru
+        if (animModel.qNextAlpha > 0) {
+          const sx = n1_x + NODE_W/2;
+          const sy = BASE_Y - 10;
+          const ex = baru_x - NODE_W/2;
+          const ey = animModel.baruY - 10;
+          const cy = (sy + ey) / 2;
+          wiresHtml += `
+            <path d="M ${sx} ${sy} C ${sx + 30} ${cy}, ${ex - 30} ${cy}, ${ex} ${ey}" 
+                  class="wire-cable new-link" stroke="#22d3ee" marker-end="url(#arrowNext)" opacity="${animModel.qNextAlpha}" />
+          `;
+        }
+
+        // Nodes
+        nodesHtml += drawNodeBox(n0_x, BASE_Y, 7, 0, true, false);
+        nodesHtml += drawNodeBox(n1_x, BASE_Y, 10, 1, false, false, "#a855f7"); // q
+        nodesHtml += drawNodeBox(n2_x, BASE_Y, 4, p >= 0.88 ? 3 : 2, false, false);
+        nodesHtml += drawNodeBox(n3_x, BASE_Y, 13, p >= 0.88 ? 4 : 3, false, true);
+
+        // Floating Node Baru
+        if (animModel.baruOpacity > 0) {
+          floatHtml += `
+            <g transform="translate(${baru_x}, ${animModel.baruY})" opacity="${animModel.baruOpacity}">
+              <rect x="${-NODE_W/2}" y="${-NODE_H/2}" width="${NODE_W}" height="${NODE_H}" rx="12" 
+                    fill="#1e1b4b" stroke="#f59e0b" stroke-width="2.5" filter="url(#glowAmber)" />
+              <circle cx="${-NODE_W/2}" cy="10" r="4.5" fill="#c084fc" />
+              <circle cx="${NODE_W/2}" cy="-10" r="4.5" fill="#22d3ee" />
+              <text x="0" y="4" fill="#ffffff" font-size="16" font-family="monospace" font-weight="900" text-anchor="middle">${valX}</text>
+              <text x="0" y="${NODE_H/2 - 6}" fill="#fbbf24" font-size="9" font-family="monospace" text-anchor="middle">${p >= 0.88 ? '[2]' : 'baru'}</text>
+              <text x="0" y="-32" fill="#fbbf24" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">node_t *baru</text>
+            </g>
+          `;
+        }
+
+      } else if (activeAnimType === 'del_node') {
+        const startX = 180;
+        const shift = animModel.closeGap * SPACING;
+        const n0_x = startX;
+        const n1_x = startX + SPACING;
+        const n1_y = BASE_Y - animModel.liftY;
+        const n2_x = startX + 2*SPACING - shift;
+        const n3_x = startX + 3*SPACING - shift;
+
+        if (p < 0.22) {
+          updateInfoBadges(true, "1. Sorot Target", "node_t *q = node_1 (10);", "Node 10 diangkat dari barisan rantai. Alamat sudah dipegang.", 4);
+        } else if (p < 0.50) {
+          updateInfoBadges(true, "2. Sambung Pintas", "q->prev->next = q->next; q->next->prev = q->prev;", "Kabel pintas atas dan bawah melompati node 10, menyatukan 7 langsung ke 4.", 4);
+        } else if (p < 0.75) {
+          updateInfoBadges(true, "3. Dealokasi Heap", "delete q; // 24 byte dikembalikan ke OS", "delete q membebaskan memori 24 byte di Heap. Node lenyap tanpa kebocoran.", 4);
+        } else {
+          updateInfoBadges(true, "4. Tutup Celah", "L.nef--; // NEF berkurang menjadi 3", "Rantai merapat ke kiri menutup lubang kosong. Kabel busur merata lurus kembali. utuh() = TRUE!", 3);
+        }
+
+        if (animModel.targetOpacity > 0.15) {
+          wiresHtml += drawDoubleArrow(n0_x, BASE_Y, n1_x, n1_y, animModel.targetOpacity);
+          wiresHtml += drawDoubleArrow(n1_x, n1_y, n2_x, BASE_Y, animModel.targetOpacity);
+        }
+
+        wiresHtml += drawDoubleArrow(n2_x, BASE_Y, n3_x, BASE_Y);
+
+        // Bypass Arcs
+        if (animModel.bypassAlpha > 0) {
+          const sx = n0_x + NODE_W/2;
+          const ex = n2_x - NODE_W/2;
+          const midY_top = BASE_Y - 65 * (1 - animModel.closeGap);
+          const midY_bot = BASE_Y + 65 * (1 - animModel.closeGap);
+
+          wiresHtml += `
+            <path d="M ${sx} ${BASE_Y - 10} C ${sx + 45} ${midY_top}, ${ex - 45} ${midY_top}, ${ex} ${BASE_Y - 10}" 
+                  class="wire-cable bypass" stroke="#10b981" marker-end="url(#arrowEmerald)" opacity="${animModel.bypassAlpha}" />
+            <path d="M ${ex} ${BASE_Y + 10} C ${ex - 45} ${midY_bot}, ${sx + 45} ${midY_bot}, ${sx} ${BASE_Y + 10}" 
+                  class="wire-cable bypass" stroke="#10b981" marker-end="url(#arrowEmerald)" opacity="${animModel.bypassAlpha}" />
+          `;
+        }
+
+        nodesHtml += drawNodeBox(n0_x, BASE_Y, 7, 0, true, false);
+        if (animModel.targetOpacity > 0) {
+          nodesHtml += `
+            <g transform="translate(${n1_x}, ${n1_y}) scale(${animModel.targetScale})" opacity="${animModel.targetOpacity}" class="node-svg-box">
+              <rect x="${-NODE_W/2}" y="${-NODE_H/2}" width="${NODE_W}" height="${NODE_H}" rx="12" 
+                    fill="#3b0716" stroke="#f43f5e" stroke-width="2.5" class="body" />
+              <circle cx="${-NODE_W/2}" cy="10" r="4.5" fill="#c084fc" />
+              <circle cx="${NODE_W/2}" cy="-10" r="4.5" fill="#22d3ee" />
+              <text x="0" y="4" fill="#ffffff" font-size="16" font-family="monospace" font-weight="900" text-anchor="middle">10</text>
+              <text x="0" y="-32" fill="#f43f5e" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">TARGET HAPUS</text>
+            </g>
+          `;
+        }
+        nodesHtml += drawNodeBox(n2_x, BASE_Y, 4, p >= 0.75 ? 1 : 2, false, false);
+        nodesHtml += drawNodeBox(n3_x, BASE_Y, 13, p >= 0.75 ? 2 : 3, false, true);
+
+      } else if (activeAnimType === 'crash_order') {
+        const startX = 140;
+        const gap = animModel.gapProgress * SPACING;
+        const n0_x = startX;
+        const n1_x = startX + SPACING;
+        const baru_x = startX + 2*SPACING;
+        const n2_x = startX + 2*SPACING + gap;
+        const n3_x = startX + 3*SPACING + gap;
+
+        if (p < 0.25) {
+          updateInfoBadges(true, "1. baru->prev = q", "baru->prev = q;", "Node baru menautkan tangan kiri ke q (10). Masih aman.", 4);
+        } else if (p < 0.50) {
+          updateInfoBadges(false, "2. FATAL: q->next Diubah Duluan!", "q->next = baru; // SALAH! Alamat node 4 HILANG!", "Kesalahan fatal: q->next dialihkan sebelum alamat node 4 disimpan!", 4);
+        } else if (p < 0.75) {
+          updateInfoBadges(false, "3. Self-Loop Mematikan", "baru->next = q->next; // Menghasilkan baru->next = baru!", "Kabel next milik baru melingkar menusuk badannya sendiri (self-loop)! Rantai kanan terputus.", 4);
+        } else {
+          updateInfoBadges(false, "4. Alarm utuh()", "if (!utuh(L)) cout << 'rantai putus';", "Rantai [4, 13] terputus bocor di RAM. Invarian utuh() berteriak FALSE!", 4);
+        }
+
+        wiresHtml += drawDoubleArrow(n0_x, BASE_Y, n1_x, BASE_Y);
+
+        if (animModel.linkLeftAlpha > 0) {
+          wiresHtml += `
+            <path d="M ${baru_x - NODE_W/2} 55 C ${baru_x - 35} 110, ${n1_x + NODE_W/2 + 35} 110, ${n1_x + NODE_W/2} ${BASE_Y + 10}" 
+                  class="wire-cable new-link" stroke="#c084fc" marker-end="url(#arrowPrev)" />
+          `;
+        }
+
+        if (animModel.qNextAlpha > 0) {
+          wiresHtml += `
+            <path d="M ${n1_x + NODE_W/2} ${BASE_Y - 10} C ${n1_x + 30} 110, ${baru_x - 30} 110, ${baru_x - NODE_W/2} 45" 
+                  class="wire-cable snapping" stroke="#f43f5e" marker-end="url(#arrowRose)" />
+          `;
+        }
+
+        if (animModel.selfLoopAlpha > 0) {
+          wiresHtml += `
+            <path d="M ${baru_x + NODE_W/2} 45 C ${baru_x + 90} -5, ${baru_x + 90} 105, ${baru_x + NODE_W/2 + 2} 55" 
+                  fill="none" stroke="#f43f5e" stroke-width="3.5" marker-end="url(#arrowRose)" opacity="${animModel.selfLoopAlpha}" />
+            <text x="${baru_x + 98}" y="55" fill="#f43f5e" font-size="10" font-family="monospace" font-weight="bold">Self-Loop!</text>
+          `;
+        }
+
+        const orphanY = BASE_Y + (1 - animModel.orphanAlpha) * 40;
+        wiresHtml += drawDoubleArrow(n2_x, orphanY, n3_x, orphanY, animModel.orphanAlpha);
+
+        nodesHtml += drawNodeBox(n0_x, BASE_Y, 7, 0, true, false);
+        nodesHtml += drawNodeBox(n1_x, BASE_Y, 10, 1, false, false, "#a855f7");
+        nodesHtml += drawNodeBox(n2_x, orphanY, 4, 2, false, false, "#f43f5e", animModel.orphanAlpha);
+        nodesHtml += drawNodeBox(n3_x, orphanY, 13, 3, false, true, "#f43f5e", animModel.orphanAlpha);
+
+        if (animModel.baruOpacity > 0) {
+          floatHtml += `
+            <g transform="translate(${baru_x}, 50)">
+              <rect x="${-NODE_W/2}" y="${-NODE_H/2}" width="${NODE_W}" height="${NODE_H}" rx="12" 
+                    fill="#1e1b4b" stroke="#f43f5e" stroke-width="2.5" />
+              <circle cx="${-NODE_W/2}" cy="10" r="4.5" fill="#c084fc" />
+              <circle cx="${NODE_W/2}" cy="-10" r="4.5" fill="#22d3ee" />
+              <text x="0" y="4" fill="#ffffff" font-size="16" font-family="monospace" font-weight="900" text-anchor="middle">9</text>
+            </g>
+          `;
+        }
+
+      } else {
+        // Default Static 4-Node Chain
+        const startX = 180;
+        const defaultNodes = [7, 10, 4, 13];
+        for (let i = 0; i < defaultNodes.length - 1; i++) {
+          wiresHtml += drawDoubleArrow(startX + i * SPACING, BASE_Y, startX + (i + 1) * SPACING, BASE_Y);
+        }
+
+        if (currentMode === 'circular') {
+          const headX = startX - NODE_W/2;
+          const tailX = startX + 3 * SPACING + NODE_W/2;
+          if (animModel.cCircCut) {
+            wiresHtml += `
+              <path d="M ${tailX} ${BASE_Y} C ${tailX + 70} ${BASE_Y + 70}, ${(headX+tailX)/2 + 20} ${BASE_Y + 70}, ${(headX+tailX)/2 + 20} ${BASE_Y + 70}" 
+                    fill="none" stroke="#f43f5e" stroke-width="3" stroke-dasharray="4 2" />
+              <path d="M ${(headX+tailX)/2 - 20} ${BASE_Y + 70} C ${(headX+tailX)/2 - 20} ${BASE_Y + 70}, ${headX - 70} ${BASE_Y + 70}, ${headX - 6} ${BASE_Y}" 
+                    fill="none" stroke="#f43f5e" stroke-width="3" stroke-dasharray="4 2" marker-end="url(#arrowRose)" />
+              <text x="${(headX + tailX)/2}" y="${BASE_Y + 75}" fill="#f43f5e" font-size="16" text-anchor="middle" font-weight="bold">✂️</text>
+            `;
+          } else {
+            wiresHtml += `
+              <g id="circularLoopWire">
+                <path d="M ${tailX} ${BASE_Y} 
+                         C ${tailX + 110} ${BASE_Y + 95}, ${headX - 110} ${BASE_Y + 95}, ${headX - 6} ${BASE_Y}" 
+                      fill="none" stroke="#22d3ee" stroke-width="3" stroke-dasharray="6 3" marker-end="url(#arrowNext)">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="1s" repeatCount="indefinite" />
+                </path>
+                <text x="${(headX + tailX)/2}" y="${BASE_Y + 80}" fill="#22d3ee" font-size="11" font-family="monospace" text-anchor="middle" font-weight="bold">
+                  tail->next = head
+                </text>
+              </g>
+            `;
+          }
+        }
+
+        defaultNodes.forEach((val, i) => {
+          const x = startX + i * SPACING;
+          const isPrinting = (animModel.cActiveIdx === i);
+          nodesHtml += drawNodeBox(x, BASE_Y, val, i, i === 0, i === 3, isPrinting ? "#22d3ee" : "#7e22ce");
+        });
+      }
+
+      dynWiresG.innerHTML = wiresHtml;
+      nodesG.innerHTML = nodesHtml;
+      floatG.innerHTML = floatHtml;
+      overlayG.innerHTML = overlaysHtml;
+    }
+
+    // Double Arrow Helper (port at -10 and +10)
+    function drawDoubleArrow(x1_center, y1_center, x2_center, y2_center, opacity = 1, isSnapping = false) {
+      const x1 = x1_center + NODE_W/2;
+      const y1 = y1_center - 10;
+      const x2 = x2_center - NODE_W/2;
+      const y2 = y2_center - 10;
+
+      const x2_b = x2_center - NODE_W/2;
+      const y2_b = y2_center + 10;
+      const x1_b = x1_center + NODE_W/2;
+      const y1_b = y1_center + 10;
+
+      const strokeClass = isSnapping ? 'wire-cable snapping' : 'wire-cable';
+      const colorNext = isSnapping ? '#f43f5e' : '#22d3ee';
+      const colorPrev = isSnapping ? '#f43f5e' : '#c084fc';
+      const markerNext = isSnapping ? 'url(#arrowRose)' : 'url(#arrowNext)';
+      const markerPrev = isSnapping ? 'url(#arrowRose)' : 'url(#arrowPrev)';
+
+      return `
+        <g opacity="${opacity}">
+          <path d="M ${x1} ${y1} L ${x2} ${y2}" class="${strokeClass}" stroke="${colorNext}" marker-end="${markerNext}" />
+          <path d="M ${x2_b} ${y2_b} L ${x1_b} ${y1_b}" class="${strokeClass}" stroke="${colorPrev}" marker-end="${markerPrev}" />
+        </g>
+      `;
+    }
+
+    // Node Box Helper
+    function drawNodeBox(x, y, val, idx, isHead, isTail, borderColor = "#7e22ce", opacity = 1) {
+      return `
+        <g transform="translate(${x}, ${y})" opacity="${opacity}" class="node-svg-box">
+          <rect x="${-NODE_W/2}" y="${-NODE_H/2}" width="${NODE_W}" height="${NODE_H}" rx="12" 
+                fill="#1e293b" stroke="${borderColor}" stroke-width="2" class="body" />
+          <circle cx="${-NODE_W/2}" cy="10" r="4.5" fill="#c084fc" />
+          <text x="${-NODE_W/2 + 8}" y="13" fill="#c084fc" font-size="8" font-family="monospace">&larr;prev</text>
+          <circle cx="${NODE_W/2}" cy="-10" r="4.5" fill="#22d3ee" />
+          <text x="${NODE_W/2 - 8}" y="-7" fill="#22d3ee" font-size="8" font-family="monospace" text-anchor="end">next&rarr;</text>
+          <text x="0" y="4" fill="#ffffff" font-size="16" font-family="monospace" font-weight="900" text-anchor="middle">${val}</text>
+          <text x="0" y="${NODE_H/2 - 6}" fill="#94a3b8" font-size="9" font-family="monospace" text-anchor="middle">[${idx}]</text>
+          ${isHead ? '<text x="0" y="-32" fill="#c084fc" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">head</text>' : ''}
+          ${isTail ? '<text x="0" y="-32" fill="#22d3ee" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">tail</text>' : ''}
+        </g>
+      `;
+    }
+
+    // ----------------------------------------------------
+    // PLAYER CONTROLS (SNAPPY 1.8s & REVERSIBLE SCRUBBER)
+    // ----------------------------------------------------
+    function toggleTimelinePlay() {
+      if (!currentTimeline) {
+        playInsertAfterAnim();
+        return;
+      }
+      if (currentTimeline.paused()) {
+        currentTimeline.play();
+        document.getElementById('playIcon').textContent = "⏸ Jeda";
+      } else {
+        currentTimeline.pause();
+        document.getElementById('playIcon').textContent = "▶ Putar";
+      }
+    }
+
+    function setSpeed(spd) {
+      animSpeed = spd;
+      ['05', '10', '20'].forEach(s => {
+        const btn = document.getElementById('speed' + s);
+        if (btn) btn.className = "px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700";
+      });
+      const activeBtn = document.getElementById('speed' + (spd === 0.5 ? '05' : (spd === 1.0 ? '10' : '20')));
+      if (activeBtn) activeBtn.className = "px-1.5 py-0.5 rounded bg-purple-600 text-[10px] text-white font-bold";
+      if (currentTimeline) currentTimeline.timeScale(spd);
+    }
+
+    function scrubTimeline(val) {
+      if (!currentTimeline) {
+        // Auto initialize InsertAfter if slider moved before pressing play
+        playInsertAfterAnim();
+        currentTimeline.pause();
+      }
+      currentTimeline.pause();
+      document.getElementById('playIcon').textContent = "▶ Putar";
+      currentTimeline.progress(val / 100);
+    }
+
+    function stepTimeline(dir) {
+      if (!currentTimeline) {
+        playInsertAfterAnim();
+        currentTimeline.pause();
+      }
+      currentTimeline.pause();
+      document.getElementById('playIcon').textContent = "▶ Putar";
+      const newProgress = Math.max(0, Math.min(1, currentTimeline.progress() + dir * 0.16));
+      currentTimeline.progress(newProgress);
+    }
+
+    function finishTimeline() {
+      if (!currentTimeline) return;
+      currentTimeline.progress(1);
+    }
+
+    function hookTimeline(tl) {
+      tl.timeScale(animSpeed);
+      tl.eventCallback("onUpdate", () => {
+        const p = tl.progress();
+        document.getElementById('animProgressSlider').value = p * 100;
+        renderCanvasFrame(p);
+      });
+      tl.eventCallback("onComplete", () => {
+        document.getElementById('playIcon').textContent = "↺ Ulang";
+      });
+    }
+
+    // ----------------------------------------------------
+    // 1. FAST & CRISP: INSERTAFTER (1.8 SECONDS TOTAL)
+    // ----------------------------------------------------
+    function playInsertAfterAnim() {
+      resetChainState();
+      activeAnimType = 'ins_after';
+
+      const tl = gsap.timeline();
+      currentTimeline = tl;
+      hookTimeline(tl);
+
+      // Total duration = 0.28 + 0.32 + 0.25 + 0.25 + 0.32 + 0.38 = 1.80s (fast!)
+      tl.to(animModel, { gapProgress: 1, duration: 0.28, ease: "power2.out" });
+      tl.to(animModel, { baruOpacity: 1, baruY: 50, duration: 0.32, ease: "back.out(1.2)" });
+      tl.to(animModel, { linkLeftAlpha: 1, duration: 0.25, ease: "power1.out" });
+      tl.to(animModel, { linkRightAlpha: 1, duration: 0.25, ease: "power1.out" });
+      tl.to(animModel, { reverseAlpha: 1, cutOldAlpha: 0, qNextAlpha: 1, duration: 0.32, ease: "power1.out" });
+      tl.to(animModel, { baruY: BASE_Y, duration: 0.38, ease: "power2.inOut" });
+    }
+
+    // ----------------------------------------------------
+    // 2. FAST & CRISP: DELETENODE (1.8 SECONDS TOTAL)
+    // ----------------------------------------------------
+    function playDeleteNodeAnim() {
+      resetChainState();
+      activeAnimType = 'del_node';
+
+      const tl = gsap.timeline();
+      currentTimeline = tl;
+      hookTimeline(tl);
+
+      tl.to(animModel, { liftY: 45, duration: 0.35, ease: "power2.out" });
+      tl.to(animModel, { bypassAlpha: 1, duration: 0.45, ease: "power1.out" });
+      tl.to(animModel, { targetOpacity: 0, targetScale: 0.2, duration: 0.40, ease: "back.in(1.3)" });
+      tl.to(animModel, { closeGap: 1, duration: 0.60, ease: "power2.inOut" });
+    }
+
+    // ----------------------------------------------------
+    // 3. FAST & CRISP: BENCANA URUTAN TERBALIK (1.8 SECONDS TOTAL)
+    // ----------------------------------------------------
+    function playBrokenOrderAnim() {
+      resetChainState();
+      activeAnimType = 'crash_order';
+
+      const tl = gsap.timeline();
+      currentTimeline = tl;
+      hookTimeline(tl);
+
+      tl.to(animModel, { gapProgress: 1, baruOpacity: 1, duration: 0.35 });
+      tl.to(animModel, { linkLeftAlpha: 1, duration: 0.30 });
+      tl.to(animModel, { qNextAlpha: 1, cutOldAlpha: 0, duration: 0.35 });
+      tl.to(animModel, { selfLoopAlpha: 1, duration: 0.40 });
+      tl.to(animModel, { orphanAlpha: 0.4, duration: 0.40 });
+    }
+
+    // ----------------------------------------------------
+    // 4. CIRCULAR ANIMATIONS
+    // ----------------------------------------------------
+    function playCInsertLastAnim() {
+      resetChainState();
+      const tl = gsap.timeline();
+      currentTimeline = tl;
+      hookTimeline(tl);
+
+      tl.add(() => {
+        updateInfoBadges(true, "CInsertLast", "cnode_t *baru = new cnode_t; baru->info = 20; C.tail->next = baru;", "Node baru 20 disisipkan di antara tail dan head.");
+        animModel.cBaruOpacity = 1;
+      });
+      tl.to({}, { duration: 0.8 });
+    }
+
+    function playCCetakAnim() {
+      resetChainState();
+      const tl = gsap.timeline();
+      currentTimeline = tl;
+      hookTimeline(tl);
+
+      [0, 1, 2, 3].forEach((idx) => {
+        tl.to(animModel, {
+          duration: 0.35,
+          onStart: () => {
+            animModel.cActiveIdx = idx;
+            const vals = [7, 10, 4, 13];
+            updateInfoBadges(true, "CCetak [" + idx + "]: " + vals[idx], "cout << p->info << ' '; p = p->next;", "Mencetak nilai " + vals[idx] + ". Pointer p maju mengelilingi cincin.");
+          }
+        });
+      });
+
+      tl.add(() => {
+        animModel.cActiveIdx = -1;
+        updateInfoBadges(true, "Selesai", "while (p != head); // Syarat p == head terpenuhi!", "Kembali tiba di head. Loop do-while berhenti tepat 1 putaran penuh!");
+      });
+    }
+
+    function playCDeallocateAnim() {
+      resetChainState();
+      const tl = gsap.timeline();
+      currentTimeline = tl;
+      hookTimeline(tl);
+
+      tl.to(animModel, {
+        duration: 0.6,
+        onStart: () => {
+          animModel.cCircCut = true;
+          updateInfoBadges(true, "Putus Lingkaran", "C.tail->next = nullptr; // ✂️ GUNTING DULU!", "Wajib putus lingkaran dulu agar loop deallocate memiliki batas berhenti.");
+        }
+      });
+
+      tl.add(() => {
+        updateInfoBadges(true, "Selesai Deallocate", "while (p) { delete p; } C.tail = nullptr;", "Seluruh node dibebaskan satu per satu. Zero leak!");
+      });
+    }
+
+    function playInsertBeforeAnim() {
+      playInsertAfterAnim();
+    }
+    function playInsertLastAnim() {
+      playInsertAfterAnim();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      resetChainState();
+    });
+
+    // ==========================================
+    // SOLUTION TABS
+    // ==========================================
+    const solSnippets = {
+      1: `<pre><code><span class="text-slate-500">// TODO 1: utuh() — Pemeriksa Dua Invarian</span>
+<span class="text-emerald-400">bool</span> <span class="text-blue-400">utuh</span>(<span class="text-purple-400">const</span> list_t &L) {
+    <span class="text-purple-400">if</span> (L.head && L.head-&gt;prev != <span class="text-purple-400">nullptr</span>) <span class="text-purple-400">return false</span>;
+    <span class="text-purple-400">if</span> (L.tail && L.tail-&gt;next != <span class="text-purple-400">nullptr</span>) <span class="text-purple-400">return false</span>;
+    <span class="text-purple-400">for</span> (node_t *p = L.head; p; p = p-&gt;next) {
+        <span class="text-purple-400">if</span> (p-&gt;next && p-&gt;next-&gt;prev != p) <span class="text-purple-400">return false</span>;
+        <span class="text-purple-400">if</span> (p-&gt;prev && p-&gt;prev-&gt;next != p) <span class="text-purple-400">return false</span>;
+    }
+    <span class="text-purple-400">return true</span>;
+}
+
+<span class="text-slate-500">// TODO 2: InsertLast() — Sisipkan di Akhir</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">InsertLast</span>(list_t &L, <span class="text-emerald-400">int</span> x) {
+    node_t *baru = <span class="text-purple-400">new</span> node_t;
+    baru-&gt;info = x; baru-&gt;next = <span class="text-purple-400">nullptr</span>; baru-&gt;prev = L.tail;
+    <span class="text-purple-400">if</span> (L.tail == <span class="text-purple-400">nullptr</span>) L.head = baru;
+    <span class="text-purple-400">else</span> L.tail-&gt;next = baru;
+    L.tail = baru; L.nef++;
+}
+
+<span class="text-slate-500">// TODO 3: InsertAfter() — EMPAT Penugasan, q->next Terakhir</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">InsertAfter</span>(list_t &L, node_t *q, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (!q) <span class="text-purple-400">return</span>;
+    node_t *baru = <span class="text-purple-400">new</span> node_t;
+    baru-&gt;info = x; baru-&gt;prev = q; baru-&gt;next = q-&gt;next;
+    <span class="text-purple-400">if</span> (q-&gt;next != <span class="text-purple-400">nullptr</span>) q-&gt;next-&gt;prev = baru;
+    <span class="text-purple-400">else</span> L.tail = baru; <span class="text-slate-500">// Batas: q adalah tail</span>
+    q-&gt;next = baru; L.nef++;
+}</code></pre>`,
+      2: `<pre><code><span class="text-slate-500">// TODO 4: InsertBefore() — Sisipkan Sebelum Node q</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">InsertBefore</span>(list_t &L, node_t *q, <span class="text-emerald-400">int</span> x) {
+    <span class="text-purple-400">if</span> (!q) <span class="text-purple-400">return</span>;
+    node_t *baru = <span class="text-purple-400">new</span> node_t;
+    baru-&gt;info = x; baru-&gt;next = q; baru-&gt;prev = q-&gt;prev;
+    <span class="text-purple-400">if</span> (q-&gt;prev != <span class="text-purple-400">nullptr</span>) q-&gt;prev-&gt;next = baru;
+    <span class="text-purple-400">else</span> L.head = baru; <span class="text-slate-500">// Batas: q adalah head</span>
+    q-&gt;prev = baru; L.nef++;
+}
+
+<span class="text-slate-500">// TODO 5: DeleteNode() — Hapus Node yang Alamatnya Dipegang (O(1))</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">DeleteNode</span>(list_t &L, node_t *q) {
+    <span class="text-purple-400">if</span> (!q) <span class="text-purple-400">return</span>;
+    <span class="text-purple-400">if</span> (q-&gt;prev != <span class="text-purple-400">nullptr</span>) q-&gt;prev-&gt;next = q-&gt;next;
+    <span class="text-purple-400">else</span> L.head = q-&gt;next; <span class="text-slate-500">// q adalah head</span>
+
+    <span class="text-purple-400">if</span> (q-&gt;next != <span class="text-purple-400">nullptr</span>) q-&gt;next-&gt;prev = q-&gt;prev;
+    <span class="text-purple-400">else</span> L.tail = q-&gt;prev; <span class="text-slate-500">// q adalah tail</span>
+
+    <span class="text-purple-400">delete</span> q; L.nef--;
+}
+
+<span class="text-slate-500">// TODO 6: Deallocate() — Bebaskan Seluruh Node, Simpan next Sebelum delete</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">Deallocate</span>(list_t &L) {
+    node_t *p = L.head;
+    <span class="text-purple-400">while</span> (p != <span class="text-purple-400">nullptr</span>) {
+        node_t *berikut = p-&gt;next;
+        <span class="text-purple-400">delete</span> p;
+        p = berikut;
+    }
+    L.head = L.tail = <span class="text-purple-400">nullptr</span>; L.nef = <span class="text-amber-300">0</span>;
+}</code></pre>`,
+      3: `<pre><code><span class="text-slate-500">// TODO 7: CInsertLast() — Sisip Akhir Melingkar (Memegang Tail)</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">CInsertLast</span>(clist_t &C, <span class="text-emerald-400">int</span> x) {
+    cnode_t *baru = <span class="text-purple-400">new</span> cnode_t;
+    baru-&gt;info = x;
+    <span class="text-purple-400">if</span> (C.tail == <span class="text-purple-400">nullptr</span>) {
+        baru-&gt;next = baru; <span class="text-slate-500">// List kosong: node menunjuk dirinya sendiri!</span>
+        C.tail = baru;
+    } <span class="text-purple-400">else</span> {
+        baru-&gt;next = C.tail-&gt;next; <span class="text-slate-500">// Sambung ke head lama</span>
+        C.tail-&gt;next = baru;
+        C.tail = baru;
+    }
+    C.nef++;
+}
+
+<span class="text-slate-500">// TODO 8: CCetak() — Cetak Memakai do-while</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">CCetak</span>(<span class="text-purple-400">const</span> clist_t &C) {
+    <span class="text-purple-400">if</span> (C.tail == <span class="text-purple-400">nullptr</span>) { cout &lt;&lt; <span class="text-amber-200">"(kosong)"</span>; <span class="text-purple-400">return</span>; }
+    cnode_t *head = C.tail-&gt;next;
+    cnode_t *p = head;
+    <span class="text-purple-400">do</span> {
+        cout &lt;&lt; p-&gt;info &lt;&lt; <span class="text-amber-200">" "</span>;
+        p = p-&gt;next;
+    } <span class="text-purple-400">while</span> (p != head);
+}
+
+<span class="text-slate-500">// TODO 9: CDeallocate() — Putuskan Lingkaran Lebih Dulu!</span>
+<span class="text-purple-400">void</span> <span class="text-blue-400">CDeallocate</span>(clist_t &C) {
+    <span class="text-purple-400">if</span> (C.tail == <span class="text-purple-400">nullptr</span>) <span class="text-purple-400">return</span>;
+    cnode_t *head = C.tail-&gt;next;
+    C.tail-&gt;next = <span class="text-purple-400">nullptr</span>; <span class="text-slate-500">// 1. PUTUS LINGKARAN!</span>
+    cnode_t *p = head;
+    <span class="text-purple-400">while</span> (p != <span class="text-purple-400">nullptr</span>) {
+        cnode_t *berikut = p-&gt;next;
+        <span class="text-purple-400">delete</span> p;
+        p = berikut;
+    }
+    C.tail = <span class="text-purple-400">nullptr</span>; C.nef = <span class="text-amber-300">0</span>;
+}</code></pre>`,
+      4: `<div class="space-y-3 text-xs leading-relaxed">
+  <div class="p-3 rounded-xl bg-slate-800 border border-slate-700">
+    <b class="text-purple-400">Soal a: Mengapa urutan penugasan InsertAfter tidak boleh dibalik?</b>
+    <p class="text-slate-300 mt-1">Bila <code class="text-amber-300">q->next</code> diubah lebih dulu (<code class="text-amber-300">q->next = baru</code>) sebelum <code class="text-amber-300">baru->next = q->next</code> dieksekusi, maka alamat node penerus lama hilang tertimpa, sehingga <code class="text-amber-300">baru->next</code> menunjuk ke <code class="text-amber-300">baru</code> sendiri (infinite loop lokal) dan seluruh sisa list di sebelah kanan bocor ke memori.</p>
+  </div>
+  <div class="p-3 rounded-xl bg-slate-800 border border-slate-700">
+    <b class="text-cyan-400">Soal b: Apa yang terjadi jika pemeriksaan list kosong di CCetak dihapus?</b>
+    <p class="text-slate-300 mt-1">Program langsung mati dengan pesan <b class="text-rose-400">Segmentation Fault</b> pada baris <code class="text-amber-300">cnode_t *head = C.tail->next;</code> karena membaca anggota <code class="text-amber-300">->next</code> dari pointer <code class="text-amber-300">nullptr</code>.</p>
+  </div>
+  <div class="p-3 rounded-xl bg-slate-800 border border-slate-700">
+    <b class="text-emerald-400">Soal c: Mengapa biaya DeleteLast pada Doubly Linked List tidak berubah (tetap 0 node dilewati) saat list membesar?</b>
+    <p class="text-slate-300 mt-1">Karena kita memegang pointer <code class="text-amber-300">tail</code> dan setiap node memiliki pointer <code class="text-amber-300">prev</code>, sehingga pendahulu ekor langsung dapat dijangkau dalam 1 langkah (<code class="text-amber-300">tail->prev</code>) tanpa perlu jalan kaki dari depan.</p>
+  </div>
+  <div class="p-3 rounded-xl bg-slate-800 border border-slate-700">
+    <b class="text-amber-400">Soal d: Mengapa memasang tail pada SINGLY tidak membuat hapus akhir O(1), sedangkan pada DOUBLY membuatnya O(1)?</b>
+    <p class="text-slate-300 mt-1">Karena pada Singly tidak ada pointer mundur (<code class="text-amber-300">prev</code>) untuk memundurkan pointer tail ke node $N-2$, sehingga pendahulu tail tetap harus dicari dengan berjalan dari head ($O(N)$); sedangkan pada Doubly, pendahulu tail langsung dapat diakses seketika lewat <code class="text-amber-300">tail->prev</code> ($O(1)$).</p>
+  </div>
+</div>`
+    };
+
+    function switchSolTab(tabNum) {
+      [1, 2, 3, 4].forEach(i => {
+        const btn = document.getElementById(`tabSol${i}`);
+        if (i === tabNum) {
+          btn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm";
+        } else {
+          btn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+        }
+      });
+      document.getElementById('solDisplayArea').innerHTML = solSnippets[tabNum];
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.remove('dark');
+      }
+      updateSlide();
+      switchMode('doubly');
+      switchSolTab(1);
+    });
+  </script>
+</body>
+</html>

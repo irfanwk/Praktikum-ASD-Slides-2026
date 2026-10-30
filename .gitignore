@@ -1,0 +1,19 @@
+# Abaikan berkas modul PDF asli (ukurannya besar & materi internal kelas)
+*.pdf
+
+# Abaikan internal cache agen AI & prompt plans
+.hermes/
+.hermes/*
+
+# Abaikan catatan instruksi lokal asisten & tools scratch
+AGENTS.md
+agents.md
+*.py
+
+# Abaikan berkas sementara dan binary kompilasi C++
+*.out
+*.exe
+*.o
+*.dSYM/
+*~
+.DS_Store
